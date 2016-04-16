@@ -2,49 +2,40 @@ package tetris
 
 import (
     "testing"
-    "fmt"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/suite"
+    . "github.com/smartystreets/goconvey/convey"
 )
 
-type TetrisTestSuite struct {
-    suite.Suite
-    Game *TetrisGame
-}
+func TestTetris(t *testing.T) {
+    Convey("Given a new tetris game", t, func() {
+        game := NewTetrisGame()
 
-func (suite *TetrisTestSuite) SetupTest() {
-    suite.Game = NewTetrisGame()
-}
+        Convey("the difficulty should be 1", func() {
+            So(game.difficulty, ShouldEqual, 1)
+        })
 
-func TestStub(t *testing.T) {
-    assert.True(t, true, "Canary test passing")
-}
+        Convey("the speed should be 1", func() {
+            So(game.speed, ShouldEqual, 1)
+        })
 
-func (suite *TetrisTestSuite) TestInitialDifficulty() {
-    assert.Equal(suite.T(), 1, suite.Game.difficulty, "Difficulty should default to 1")
-}
+        Convey("the score should be 0", func() {
+            So(game.score, ShouldEqual, 0)
+        })
 
-func (suite *TetrisTestSuite) TestInitialSpeed() {
-    assert.Equal(suite.T(), 1, suite.Game.speed, "Speed should default to 1")
-}
+        Convey("the board", func() {
+            board := game.Board
 
-func (suite *TetrisTestSuite) TestInitialScore() {
-    assert.Equal(suite.T(), 0, suite.Game.score, "Score should default to 0")
-}
+            Convey("dimensions should be 10x20", func() {
+                So(board.width, ShouldEqual, 10)
+                So(board.height, ShouldEqual, 20)
+            })
 
-func (suite *TetrisTestSuite) TestInitialBoardDimensions() {
-    assert.Equal(suite.T(), 10, suite.Game.Board.width, "Width should be 10")
-    assert.Equal(suite.T(), 20, suite.Game.Board.height, "Height should be 10")
-}
-
-func (suite *TetrisTestSuite) TestInitialBoardEmpty() {
-    for y, row := range suite.Game.Board.plane {
-        for x, space := range row {
-            assert.True(suite.T(), space.empty, fmt.Sprintf("Space %d, %d should be empty", x, y))
-        }
-    }
-}
-
-func TestTetrisTestSuite(t *testing.T) {
-    suite.Run(t, new(TetrisTestSuite))
+            Convey("should be empty", func() {
+                for _, row := range board.plane {
+                    for _, space := range row {
+                        So(space.empty, ShouldBeTrue)
+                    }
+                }
+            })
+        })
+    })
 }
