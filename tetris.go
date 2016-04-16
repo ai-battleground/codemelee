@@ -6,7 +6,7 @@ type TetrisGame struct {
 }
 
 type Board struct {
-    width int
+    width, height int
 }
 
 func NewTetrisGame() *TetrisGame {
@@ -14,5 +14,5 @@ func NewTetrisGame() *TetrisGame {
 }
 
 func NewTetrisBoard() *Board {
-    return &Board{width:10}
+    return &Board{width:10, height:20}
 }

@@ -14,7 +14,8 @@ func TestInitialDifficulty(t *testing.T) {
     assert.Equal(t, 1, game.difficulty, "Difficulty should default to 1")
 }
 
-func TestInitialBoardWidth(t *testing.T) {
+func TestInitialBoardDimenstions(t *testing.T) {
     game := NewTetrisGame()
     assert.Equal(t, 10, game.Board.width, "Width should be 10")
+    assert.Equal(t, 20, game.Board.height, "Height should be 10")
 }
