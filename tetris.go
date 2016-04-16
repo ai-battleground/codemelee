@@ -6,7 +6,7 @@ type TetrisGame struct {
 }
 
 type Board struct {
-    width, height int
+    width, height, score int
     plane [][]Space
 }
 
