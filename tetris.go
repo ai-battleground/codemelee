@@ -1,12 +1,12 @@
 package tetris
 
 type TetrisGame struct {
-    difficulty, speed int
+    difficulty, speed, score int
     *Board
 }
 
 type Board struct {
-    width, height, score int
+    width, height int
     plane [][]Space
 }
 
@@ -15,7 +15,7 @@ type Space struct {
 }
 
 func NewTetrisGame() *TetrisGame {
-    return &TetrisGame{difficulty: 1, speed: 1, Board: NewTetrisBoard()}
+    return &TetrisGame{difficulty: 1, speed: 1, score:0, Board: NewTetrisBoard()}
 }
 
 func NewTetrisBoard() *Board {
