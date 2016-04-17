@@ -1,8 +1,13 @@
 package tetris
 
 type TetrisGame struct {
-    difficulty, speed, score int
+    score int
+    *Level
     *Board
+}
+
+type Level struct {
+    number, speed int
 }
 
 type Point struct {
@@ -40,9 +45,8 @@ func (board *Board) Advance() {
 
 func NewTetrisGame() *TetrisGame {
     return &TetrisGame{
-        difficulty: 1, 
-        speed: 1, 
-        score:0, 
+        score:0,
+        Level: &Level{number: 1, speed: 1},
         Board: NewTetrisBoard()}
 }
 

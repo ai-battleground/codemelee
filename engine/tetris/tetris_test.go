@@ -9,12 +9,12 @@ func TestTetris(t *testing.T) {
     Convey("Given a new tetris game", t, func() {
         game := NewTetrisGame()
 
-        Convey("the difficulty should be 1", func() {
-            So(game.difficulty, ShouldEqual, 1)
+        Convey("the level should be 1", func() {
+            So(game.Level.number, ShouldEqual, 1)
         })
 
         Convey("the speed should be 1", func() {
-            So(game.speed, ShouldEqual, 1)
+            So(game.Level.speed, ShouldEqual, 1)
         })
 
         Convey("the score should be 0", func() {
