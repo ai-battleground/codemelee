@@ -66,5 +66,17 @@ func TestTetris(t *testing.T) {
                 So(board.PiecePosition.y, ShouldEqual, 14)
             })
         })
+
+        Convey("when a piece is staged", func() {
+            board.Stage(Pieces.Box)
+            
+            Convey("the piece should be positioned at the top", func() {
+                So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
+            })
+
+            Convey("the piece should be centered", func() {
+                So(board.PiecePosition.x, ShouldEqual, 5)
+            })
+        })
     })
 }
