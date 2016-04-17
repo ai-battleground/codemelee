@@ -6,3 +6,5 @@ Intended to help facilitate coding dojos, classes, and friendly coding competiti
 * game engine
 * competition hosting platform
 * set of player templates in various languages
+
+[![Build Status](https://travis-ci.org/rhoegg/codemelee.svg?branch=master)](https://travis-ci.org/rhoegg/codemelee)
