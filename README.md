@@ -1,6 +1,6 @@
 # Video games are fun for computers, too!
 
-Intended to help facilitate coding dojos, classes, and friendly coding competitions using video games. Inspired by codenjoy.
+Intended to help facilitate coding dojos, classes, and friendly coding competitions using video games. Inspired by [codenjoy](http://codenjoy.com/portal/) [(bitbucket repo)](https://bitbucket.org/codenjoy/codenjoy-game).
 
 ## Planned components
 * game engine
