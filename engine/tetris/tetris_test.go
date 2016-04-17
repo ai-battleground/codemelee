@@ -41,11 +41,11 @@ func TestTetris(t *testing.T) {
         Convey("when the game is started", func() {
             game.Start()
 
-            Convey("the player", func() {
-                player := game.Player
+            Convey("the board", func() {
+                board := game.Board
 
-                Convey("should have a box", func() {
-                    So(player.Piece, ShouldEqual, Pieces.Box)
+                Convey("should have an active piece", func() {
+                    So(board.Piece, ShouldEqual, Pieces.Box)
                 })
             })
         })
