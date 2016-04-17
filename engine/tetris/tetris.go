@@ -1,15 +1,19 @@
 package tetris
 
-
 type TetrisGame struct {
     difficulty, speed, score int
     *Board
+}
+
+type Point struct {
+    x, y int
 }
 
 type Board struct {
     width, height int
     plane [][]Space
     Piece *TetrisPiece
+    PiecePosition Point
 }
 
 type Space struct {
@@ -27,7 +31,11 @@ var Pieces = struct {
     &TetrisPiece{width:2,height:2,name:"Box"}}
 
 func (game TetrisGame) Start() {
+    game.Board.PiecePosition.y = game.Board.height - game.Board.Piece.height
+}
 
+func (board *Board) Advance() {
+    board.PiecePosition.y = board.PiecePosition.y - 1
 }
 
 func NewTetrisGame() *TetrisGame {

@@ -47,6 +47,23 @@ func TestTetris(t *testing.T) {
                 Convey("should have an active piece", func() {
                     So(board.Piece, ShouldEqual, Pieces.Box)
                 })
+
+                Convey("should position the piece at the top", func() {
+                    So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
+                })
+            })
+        })
+    })
+
+    Convey("Given a tetris board", t, func() {
+        board := NewTetrisBoard()
+
+        Convey("when time is advanced", func() {
+            board.PiecePosition.y = 15
+            board.Advance()
+
+            Convey("the piece should descend", func() {
+                So(board.PiecePosition.y, ShouldEqual, 14)
             })
         })
     })
