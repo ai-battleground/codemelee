@@ -37,5 +37,17 @@ func TestTetris(t *testing.T) {
                 }
             })
         })
+
+        Convey("when the game is started", func() {
+            game.Start()
+
+            Convey("the player", func() {
+                player := game.Player
+
+                Convey("should have a box", func() {
+                    So(player.Piece, ShouldEqual, Pieces.Box)
+                })
+            })
+        })
     })
 }
