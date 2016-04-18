@@ -36,7 +36,7 @@ func (board *Board) Advance() {
     if board.shouldAnchor() {
         board.Anchor()
     } else {
-        board.PiecePosition.y = board.PiecePosition.y - 1
+        board.move(Point{0, -1})
     }
 }
 
@@ -61,10 +61,17 @@ func (board *Board) MoveLeft() {
     board.move(Point{-1, 0})
 }
 
+func (board *Board) Drop() {
+    for ! board.shouldAnchor() {
+        board.move(Point{0, -1})
+    }
+    board.Anchor()
+}
+
 func (board *Board) move(vector Point) {
     if ! board.wouldCollide(vector) {
         destination := translate(board.PiecePosition, vector)
-        board.PiecePosition.x = destination.x
+        board.PiecePosition = destination
     }
 }
 

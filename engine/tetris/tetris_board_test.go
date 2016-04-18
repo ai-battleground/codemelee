@@ -28,8 +28,8 @@ func TestTetrisBoard(t *testing.T) {
                 board.Advance()
 
                 Convey("the piece should be anchored to the board", func() {
-                    So(board.plane[0], ShouldResemble, row("   **     "))
                     So(board.plane[1], ShouldResemble, row("   **     "))
+                    So(board.plane[0], ShouldResemble, row("   **     "))
                 })
 
                 Convey("the piece should be sent to the anchor channel", func() {
@@ -129,6 +129,41 @@ func TestTetrisBoard(t *testing.T) {
                 board.plane[11] = row("  **      ")
                 board.MoveLeft()
                 So(board.PiecePosition.x, ShouldEqual, 4)
+            })
+        })
+
+        Convey("when the player drops the piece", func() {
+            board.Piece = Pieces.Box
+            board.PiecePosition = Point{6, 17}
+
+            Convey("with no filled spaces below, the piece should anchor to the floor", func() {
+                board.Drop()
+                select {
+                    case anchoredPiece := <-board.Anchored:
+                        So(anchoredPiece, ShouldEqual, Pieces.Box)
+                    case <-time.After(time.Second * 1):
+                        So(nil, ShouldNotBeNil)
+                }
+                So(board.plane[1], ShouldResemble, row("      **  "))
+                So(board.plane[0], ShouldResemble, row("      **  "))
+            })
+
+            Convey("with a filled space below, the piece should anchor directly above it", func() {
+                board.plane[1] = row("    ***   ")
+                board.plane[0] = row("    *     ")
+                board.Drop()
+                
+                select {
+                    case anchoredPiece := <-board.Anchored:
+                        So(anchoredPiece, ShouldEqual, Pieces.Box)
+                    case <-time.After(time.Second * 1):
+                        So(nil, ShouldNotBeNil)
+                }
+
+                So(board.plane[3], ShouldResemble, row("      **  "))
+                So(board.plane[2], ShouldResemble, row("      **  "))
+                So(board.plane[1], ShouldResemble, row("    ***   "))
+                So(board.plane[0], ShouldResemble, row("    *     "))
             })
         })
     })
