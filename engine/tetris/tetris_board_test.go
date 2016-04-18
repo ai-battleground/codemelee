@@ -113,6 +113,13 @@ func TestTetrisBoard(t *testing.T) {
                 So(board.PiecePosition.x, ShouldEqual, 0)
             })
 
+            Convey("and the piece is adjacent to a filled space, the piece should not move", func() {
+                board.PiecePosition = Point{4, 10}
+                board.plane[11] = row("  **      ")
+                board.MoveLeft()
+                So(board.PiecePosition.x, ShouldEqual, 4)
+            })
+
         })
     })
 }
