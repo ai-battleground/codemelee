@@ -59,11 +59,25 @@ func TestTetris(t *testing.T) {
         board := NewTetrisBoard()
 
         Convey("when time is advanced", func() {
-            board.PiecePosition.y = 15
-            board.Advance()
+            Convey("and the piece is clear", func() {
+                board.Piece = Pieces.Box
+                board.PiecePosition.y = 15
+                board.Advance()
 
-            Convey("the piece should descend", func() {
-                So(board.PiecePosition.y, ShouldEqual, 14)
+                Convey("the piece should descend", func() {
+                    So(board.PiecePosition.y, ShouldEqual, 14)
+                })
+            })
+
+            Convey("and the piece is at the bottom", func() {
+                board.Piece = Pieces.Box
+                board.PiecePosition = Point{3, 0}
+                board.Advance()
+
+                Convey("the piece should be anchored to the board", func() {
+                    So(board.plane[0], ShouldResemble, row("   **     "))
+                    So(board.plane[1], ShouldResemble, row("   **     "))
+                })
             })
         })
 
@@ -75,8 +89,16 @@ func TestTetris(t *testing.T) {
             })
 
             Convey("the piece should be centered", func() {
-                So(board.PiecePosition.x, ShouldEqual, 5)
+                So(board.PiecePosition.x, ShouldEqual, 4)
             })
         })
     })
+}
+
+func row(s string) []Space {
+    row := make([]Space, 10)
+    for i := 0; i<10; i++ {
+        row[i] = Space{empty: s[i] == byte(' ')}
+    }
+    return row
 }
