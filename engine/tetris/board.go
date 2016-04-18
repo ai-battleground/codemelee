@@ -32,7 +32,7 @@ func (space Space) String() string {
 }
 
 func (board *Board) Advance() {
-    if board.PiecePosition.y == 0 {
+    if board.shouldAnchor() {
         board.Anchor()
         board.Stage(Pieces.Box)
     } else {
@@ -50,6 +50,20 @@ func (board *Board) Anchor() {
         filled := translate(board.PiecePosition, p)
         board.plane[filled.y][filled.x].empty = false
     }
+}
+
+func (board Board) shouldAnchor() bool {
+    position := translate(board.PiecePosition, Point{0, -1})
+    for _, p := range board.Piece.Points {
+        testPoint := translate(position, p)
+        if testPoint.y < 0 {
+            return true
+        }
+        if ! board.plane[testPoint.y][testPoint.x].empty {
+            return true
+        }
+    }
+    return false
 }
 
 func translate(origin Point, vector Point) Point {

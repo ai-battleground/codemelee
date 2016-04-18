@@ -83,6 +83,25 @@ func TestTetris(t *testing.T) {
                     So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
                 })
             })
+
+            Convey("and the piece is directly above at least one filled space", func() {
+                board.Piece = Pieces.Box
+                board.PiecePosition = Point{7, 2}
+                //                           xx
+                //                           xx
+                board.plane[1] = row("      **  ")
+                board.plane[0] = row("     **   ")
+                board.Advance()
+
+                Convey("the piece should be anchored to the board", func() {
+                    So(board.plane[3], ShouldResemble, row("       ** "))
+                    So(board.plane[2], ShouldResemble, row("       ** "))
+                })
+
+                Convey("a new piece should be staged", func() {
+                    So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
+                })
+            })
         })
 
         Convey("when a piece is staged", func() {
