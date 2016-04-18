@@ -57,6 +57,10 @@ func (board *Board) MoveRight() {
     }
 }
 
+func (board *Board) MoveLeft() {
+    board.PiecePosition.x--
+}
+
 func (board Board) shouldAnchor() bool {
     return board.wouldCollide(Point{0, -1})
 }
