@@ -106,6 +106,13 @@ func TestTetrisBoard(t *testing.T) {
                 board.MoveLeft()
                 So(board.PiecePosition.x, ShouldEqual, 7)
             })
+
+            Convey("and the piece is against the wall, the piece should not move", func() {
+                board.PiecePosition = Point{0, 10}
+                board.MoveLeft()
+                So(board.PiecePosition.x, ShouldEqual, 0)
+            })
+
         })
     })
 }

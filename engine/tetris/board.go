@@ -52,13 +52,18 @@ func (board *Board) Anchor() {
 }
 
 func (board *Board) MoveRight() {
-    if ! board.wouldCollide(Point{1, 0}) {
-        board.PiecePosition.x++
-    }
+    board.move(Point{1, 0})
 }
 
 func (board *Board) MoveLeft() {
-    board.PiecePosition.x--
+    board.move(Point{-1, 0})
+}
+
+func (board *Board) move(vector Point) {
+    if ! board.wouldCollide(vector) {
+        destination := translate(board.PiecePosition, vector)
+        board.PiecePosition.x = destination.x
+    }
 }
 
 func (board Board) shouldAnchor() bool {
@@ -69,7 +74,7 @@ func (board Board) wouldCollide(vector Point) bool {
     position := translate(board.PiecePosition, vector)
     for _, p := range board.Piece.Points {
         testPoint := translate(position, p)
-        if testPoint.y < 0 || testPoint.x >= 10 {
+        if testPoint.y < 0 || testPoint.x < 0 || testPoint.x >= 10 {
             return true
         }
         if ! board.space(testPoint).empty {
