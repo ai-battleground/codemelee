@@ -52,7 +52,9 @@ func (board *Board) Anchor() {
 }
 
 func (board *Board) MoveRight() {
-    board.PiecePosition.x++
+    if (board.PiecePosition.x + board.Piece.width) <= 10 {
+        board.PiecePosition.x++
+    }
 }
 
 func (board Board) shouldAnchor() bool {

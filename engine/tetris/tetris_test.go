@@ -118,12 +118,17 @@ func TestTetris(t *testing.T) {
 
         Convey("when the player moves right", func() {
             board.Piece = Pieces.Box
-            board.PiecePosition = Point{3, 10}
-            Convey("and the piece is free to move", func() {
+
+            Convey("the piece should move to the right", func() {
+                board.PiecePosition = Point{3, 10}
                 board.MoveRight()
-                Convey("the piece should move to the right", func() {
-                    So(board.PiecePosition.x, ShouldEqual, 4)
-                })
+                So(board.PiecePosition.x, ShouldEqual, 4)
+            })
+
+            Convey("and the piece is against the wall, the piece should not move", func() {
+                board.PiecePosition = Point{9, 10} // box width is 2
+                board.MoveRight()
+                So(board.PiecePosition.x, ShouldEqual, 9)
             })
         })
     })
