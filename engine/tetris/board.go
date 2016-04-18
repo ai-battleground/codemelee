@@ -32,8 +32,12 @@ func (space Space) String() string {
 }
 
 func (board *Board) Advance() {
-    board.Anchor()
-    board.PiecePosition.y = board.PiecePosition.y - 1
+    if board.PiecePosition.y == 0 {
+        board.Anchor()
+        board.Stage(Pieces.Box)
+    } else {
+        board.PiecePosition.y = board.PiecePosition.y - 1
+    }
 }
 
 func (board *Board) Stage(piece *TetrisPiece) {

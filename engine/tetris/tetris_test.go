@@ -78,6 +78,10 @@ func TestTetris(t *testing.T) {
                     So(board.plane[0], ShouldResemble, row("   **     "))
                     So(board.plane[1], ShouldResemble, row("   **     "))
                 })
+
+                Convey("a new piece should be staged", func() {
+                    So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
+                })
             })
         })
 
