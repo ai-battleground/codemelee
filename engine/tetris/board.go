@@ -9,6 +9,7 @@ type Board struct {
     plane [][]Space
     Piece *TetrisPiece
     PiecePosition Point
+    Anchored chan *TetrisPiece
 }
 
 type Point struct {
@@ -34,7 +35,6 @@ func (space Space) String() string {
 func (board *Board) Advance() {
     if board.shouldAnchor() {
         board.Anchor()
-        board.Stage(Pieces.Box)
     } else {
         board.PiecePosition.y = board.PiecePosition.y - 1
     }
@@ -46,9 +46,11 @@ func (board *Board) Stage(piece *TetrisPiece) {
 }
 
 func (board *Board) Anchor() {
-    for _, p := range board.Piece.Points {
+    anchoredPiece := board.Piece
+    for _, p := range anchoredPiece.Points {
         board.space(translate(board.PiecePosition, p)).empty = false
     }
+    go func() { board.Anchored <- anchoredPiece }()
 }
 
 func (board *Board) MoveRight() {
@@ -93,7 +95,7 @@ func translate(origin Point, vector Point) Point {
 }
 
 func NewTetrisBoard() *Board {
-    return &Board{width:10, height:20, plane: NewPlane(10, 20)}
+    return &Board{width:10, height:20, plane: NewPlane(10, 20), Anchored: make(chan *TetrisPiece)}
 }
 
 func NewPlane(width int, height int) [][]Space {

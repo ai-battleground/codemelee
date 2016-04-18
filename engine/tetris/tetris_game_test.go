@@ -6,18 +6,18 @@ import (
 )
 
 func TestTetrisGame(t *testing.T) {
-    Convey("Given a new tetris game", t, func() {
+    Convey("Given a tetris game", t, func() {
         game := NewTetrisGame()
 
-        Convey("the level should be 1", func() {
+        Convey("the initial level should be 1", func() {
             So(game.Level.number, ShouldEqual, 1)
         })
 
-        Convey("the speed should be 1", func() {
+        Convey("the initial speed should be 1", func() {
             So(game.Level.speed, ShouldEqual, 1)
         })
 
-        Convey("the score should be 0", func() {
+        Convey("the initial score should be 0", func() {
             So(game.score, ShouldEqual, 0)
         })
 
@@ -52,6 +52,19 @@ func TestTetrisGame(t *testing.T) {
                     So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
                 })
             })
+
+        })
+
+        Convey("when a piece is anchored", func() {
+            game.Start()
+
+            game.Board.Anchored <- Pieces.Box
+
+            Convey("a new piece should be staged", func() {
+                So(game.Board.Piece, ShouldEqual, Pieces.Box)
+                So(game.Board.PiecePosition.y, ShouldEqual, game.Board.height - game.Board.Piece.height)
+            })
         })
     })
 }
+

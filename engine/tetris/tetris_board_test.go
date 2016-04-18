@@ -2,6 +2,7 @@ package tetris
 
 import (
     "testing"
+    "time"
     . "github.com/smartystreets/goconvey/convey"
 )
 
@@ -31,8 +32,13 @@ func TestTetrisBoard(t *testing.T) {
                     So(board.plane[1], ShouldResemble, row("   **     "))
                 })
 
-                Convey("a new piece should be staged", func() {
-                    So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
+                Convey("the piece should be sent to the anchor channel", func() {
+                    select {
+                        case anchoredPiece := <-board.Anchored:
+                            So(anchoredPiece, ShouldEqual, Pieces.Box)
+                        case <-time.After(time.Second * 1):
+                            So(nil, ShouldNotBeNil)
+                    }
                 })
             })
 
@@ -50,8 +56,13 @@ func TestTetrisBoard(t *testing.T) {
                     So(board.plane[2], ShouldResemble, row("       ** "))
                 })
 
-                Convey("a new piece should be staged", func() {
-                    So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
+                Convey("the piece should be sent to the anchor channel", func() {
+                    select {
+                        case anchoredPiece := <-board.Anchored:
+                            So(anchoredPiece, ShouldEqual, Pieces.Box)
+                        case <-time.After(time.Second * 1):
+                            So(nil, ShouldNotBeNil)
+                    }
                 })
             })
         })
@@ -119,7 +130,6 @@ func TestTetrisBoard(t *testing.T) {
                 board.MoveLeft()
                 So(board.PiecePosition.x, ShouldEqual, 4)
             })
-
         })
     })
 }

@@ -32,6 +32,10 @@ var Pieces = struct {
 
 func (game *TetrisGame) Start() {
     game.Board.Stage(game.Level.Piece)
+    go func() {
+        anchoredPiece := <- game.Board.Anchored
+        game.Board.Stage(anchoredPiece)
+    }()
 }
 
 func NewTetrisGame() *TetrisGame {
