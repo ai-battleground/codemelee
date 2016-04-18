@@ -130,6 +130,13 @@ func TestTetris(t *testing.T) {
                 board.MoveRight()
                 So(board.PiecePosition.x, ShouldEqual, 9)
             })
+
+            Convey("with wider piece against the wall, the piece should not move", func() {
+                board.Piece = &TetrisPiece{width:4, name: "TestPiece"}
+                board.PiecePosition = Point{7, 10}
+                board.MoveRight()
+                So(board.PiecePosition.x, ShouldEqual, 7)
+            })
         })
     })
 }
