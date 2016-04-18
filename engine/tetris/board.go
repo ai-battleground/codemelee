@@ -51,6 +51,10 @@ func (board *Board) Anchor() {
     }
 }
 
+func (board *Board) MoveRight() {
+    board.PiecePosition.x++
+}
+
 func (board Board) shouldAnchor() bool {
     position := translate(board.PiecePosition, Point{0, -1})
     for _, p := range board.Piece.Points {

@@ -115,6 +115,17 @@ func TestTetris(t *testing.T) {
                 So(board.PiecePosition.x, ShouldEqual, 4)
             })
         })
+
+        Convey("when the player moves right", func() {
+            board.Piece = Pieces.Box
+            board.PiecePosition = Point{3, 10}
+            Convey("and the piece is free to move", func() {
+                board.MoveRight()
+                Convey("the piece should move to the right", func() {
+                    So(board.PiecePosition.x, ShouldEqual, 4)
+                })
+            })
+        })
     })
 }
 
