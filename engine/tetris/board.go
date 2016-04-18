@@ -47,8 +47,7 @@ func (board *Board) Stage(piece *TetrisPiece) {
 
 func (board *Board) Anchor() {
     for _, p := range board.Piece.Points {
-        filled := translate(board.PiecePosition, p)
-        board.plane[filled.y][filled.x].empty = false
+        board.space(translate(board.PiecePosition, p)).empty = false
     }
 }
 
@@ -59,11 +58,15 @@ func (board Board) shouldAnchor() bool {
         if testPoint.y < 0 {
             return true
         }
-        if ! board.plane[testPoint.y][testPoint.x].empty {
+        if ! board.space(testPoint).empty {
             return true
         }
     }
     return false
+}
+
+func (board *Board) space(point Point) *Space {
+    return &board.plane[point.y][point.x]
 }
 
 func translate(origin Point, vector Point) Point {
