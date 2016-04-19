@@ -10,6 +10,7 @@ type Board struct {
     Piece *TetrisPiece
     PiecePosition Point
     Anchored chan *TetrisPiece
+    Cleared chan int
 }
 
 type Point struct {
@@ -51,6 +52,15 @@ func (board *Board) Anchor() {
         board.space(translate(board.PiecePosition, p)).empty = false
     }
     go func() { board.Anchored <- anchoredPiece }()
+    go board.ClearLines()
+}
+
+func (board *Board) ClearLines() {
+    for i, row := range board.plane {
+        if isComplete(row) {
+            board.Cleared <- i
+        }
+    }
 }
 
 func (board *Board) MoveRight() {
@@ -101,8 +111,22 @@ func translate(origin Point, vector Point) Point {
     return Point{origin.x + vector.x, origin.y + vector.y}
 }
 
+func isComplete(row []Space) bool {
+    for _, space := range row {
+        if space.empty {
+            return false
+        }
+    }
+    return true
+}
+
 func NewTetrisBoard() *Board {
-    return &Board{width:10, height:20, plane: NewPlane(10, 20), Anchored: make(chan *TetrisPiece)}
+    return &Board{
+        width:10, 
+        height:20, 
+        plane: NewPlane(10, 20), 
+        Anchored: make(chan *TetrisPiece),
+        Cleared: make(chan int)}
 }
 
 func NewPlane(width int, height int) [][]Space {

@@ -166,6 +166,28 @@ func TestTetrisBoard(t *testing.T) {
                 So(board.plane[0], ShouldResemble, row("    *     "))
             })
         })
+
+        Convey("when the player scores", func() {
+            board.plane[3] = row("********  ")
+            board.plane[2] = row("********* ")
+            board.plane[1] = row("* ********")
+            board.plane[0] = row("* ********")
+
+            Convey("a single line", func() {
+                board.Piece = Pieces.Stick
+                board.PiecePosition = Point{9,15}
+                board.Drop()
+
+                Convey("the line should be sent to the cleared channel", func() {
+                    select {
+                        case clearedLine := <-board.Cleared:
+                            So(clearedLine, ShouldEqual, 2)
+                        case <-time.After(time.Second * 1):
+                            So(nil, ShouldNotBeNil)
+                    }
+                })
+            })
+        })
     })
 }
 

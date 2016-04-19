@@ -19,6 +19,7 @@ type TetrisPiece struct {
 
 var Pieces = struct {
     Box *TetrisPiece
+    Stick *TetrisPiece
 }{
     &TetrisPiece{
         width:2,
@@ -28,7 +29,16 @@ var Pieces = struct {
             Point{0,0},
             Point{1,0},
             Point{0,1},
-            Point{1,1}}}}
+            Point{1,1}}},
+    &TetrisPiece{
+        width:1,
+        height:4,
+        name:"Stick",
+        Points: []Point{
+            Point{0,0},
+            Point{0,1},
+            Point{0,2},
+            Point{0,3}}}}
 
 func (game *TetrisGame) Start() {
     game.Board.Stage(game.Level.Piece)
