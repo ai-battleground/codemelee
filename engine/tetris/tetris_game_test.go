@@ -45,7 +45,7 @@ func TestTetrisGame(t *testing.T) {
                 board := game.Board
 
                 Convey("should have an active piece", func() {
-                    So(board.Piece, ShouldEqual, Pieces.Box)
+                    So(board.Piece, ShouldEqual, Pieces.O)
                 })
 
                 Convey("should position the piece at the top", func() {
@@ -58,10 +58,10 @@ func TestTetrisGame(t *testing.T) {
         Convey("when a piece is anchored", func() {
             game.Start()
 
-            game.Board.Anchored <- Pieces.Box
+            game.Board.Anchored <- Pieces.O
 
             Convey("a new piece should be staged", func() {
-                So(game.Board.Piece, ShouldEqual, Pieces.Box)
+                So(game.Board.Piece, ShouldEqual, Pieces.O)
                 So(game.Board.PiecePosition.y, ShouldEqual, game.Board.height - game.Board.Piece.height)
             })
         })

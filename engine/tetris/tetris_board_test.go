@@ -13,7 +13,7 @@ func TestTetrisBoard(t *testing.T) {
 
         Convey("when time is advanced", func() {
             Convey("and the piece is clear", func() {
-                board.Piece = Pieces.Box
+                board.Piece = Pieces.O
                 board.PiecePosition.y = 15
                 board.Advance()
 
@@ -23,7 +23,7 @@ func TestTetrisBoard(t *testing.T) {
             })
 
             Convey("and the piece is at the bottom", func() {
-                board.Piece = Pieces.Box
+                board.Piece = Pieces.O
                 board.PiecePosition = Point{3, 0}
                 board.Advance()
 
@@ -35,7 +35,7 @@ func TestTetrisBoard(t *testing.T) {
                 Convey("the piece should be sent to the anchor channel", func() {
                     select {
                         case anchoredPiece := <-board.Anchored:
-                            So(anchoredPiece, ShouldEqual, Pieces.Box)
+                            So(anchoredPiece, ShouldEqual, Pieces.O)
                         case <-time.After(time.Second * 1):
                             So(nil, ShouldNotBeNil)
                     }
@@ -43,7 +43,7 @@ func TestTetrisBoard(t *testing.T) {
             })
 
             Convey("and the piece is directly above at least one filled space", func() {
-                board.Piece = Pieces.Box
+                board.Piece = Pieces.O
                 board.PiecePosition = Point{7, 2}
                 //                           xx
                 //                           xx
@@ -59,7 +59,7 @@ func TestTetrisBoard(t *testing.T) {
                 Convey("the piece should be sent to the anchor channel", func() {
                     select {
                         case anchoredPiece := <-board.Anchored:
-                            So(anchoredPiece, ShouldEqual, Pieces.Box)
+                            So(anchoredPiece, ShouldEqual, Pieces.O)
                         case <-time.After(time.Second * 1):
                             So(nil, ShouldNotBeNil)
                     }
@@ -68,7 +68,7 @@ func TestTetrisBoard(t *testing.T) {
         })
 
         Convey("when a piece is staged", func() {
-            board.Stage(Pieces.Box)
+            board.Stage(Pieces.O)
             
             Convey("the piece should be positioned at the top", func() {
                 So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
@@ -80,7 +80,7 @@ func TestTetrisBoard(t *testing.T) {
         })
 
         Convey("when the player moves right", func() {
-            board.Piece = Pieces.Box
+            board.Piece = Pieces.O
 
             Convey("the piece should move to the right", func() {
                 board.PiecePosition = Point{3, 10}
@@ -110,7 +110,7 @@ func TestTetrisBoard(t *testing.T) {
         })
 
         Convey("when the player moves left", func() {
-            board.Piece = Pieces.Box
+            board.Piece = Pieces.O
 
             Convey("the piece should move to the left", func() {
                 board.PiecePosition = Point{8, 10}
@@ -133,14 +133,14 @@ func TestTetrisBoard(t *testing.T) {
         })
 
         Convey("when the player drops the piece", func() {
-            board.Piece = Pieces.Box
+            board.Piece = Pieces.O
             board.PiecePosition = Point{6, 17}
 
             Convey("with no filled spaces below, the piece should anchor to the floor", func() {
                 board.Drop()
                 select {
                     case anchoredPiece := <-board.Anchored:
-                        So(anchoredPiece, ShouldEqual, Pieces.Box)
+                        So(anchoredPiece, ShouldEqual, Pieces.O)
                     case <-time.After(time.Second * 1):
                         So(nil, ShouldNotBeNil)
                 }
@@ -155,7 +155,7 @@ func TestTetrisBoard(t *testing.T) {
                 
                 select {
                     case anchoredPiece := <-board.Anchored:
-                        So(anchoredPiece, ShouldEqual, Pieces.Box)
+                        So(anchoredPiece, ShouldEqual, Pieces.O)
                     case <-time.After(time.Second * 1):
                         So(nil, ShouldNotBeNil)
                 }
@@ -174,7 +174,7 @@ func TestTetrisBoard(t *testing.T) {
             board.plane[0] = row("* ********")
 
             Convey("a single line", func() {
-                board.Piece = Pieces.Stick
+                board.Piece = Pieces.I
                 board.PiecePosition = Point{9,15}
                 board.Drop()
 

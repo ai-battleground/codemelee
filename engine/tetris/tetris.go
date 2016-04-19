@@ -18,13 +18,13 @@ type TetrisPiece struct {
 }
 
 var Pieces = struct {
-    Box *TetrisPiece
-    Stick *TetrisPiece
+    O *TetrisPiece
+    I *TetrisPiece
 }{
     &TetrisPiece{
         width:2,
         height:2,
-        name:"Box", 
+        name:"O", 
         Points: []Point{
             Point{0,0},
             Point{1,0},
@@ -33,7 +33,7 @@ var Pieces = struct {
     &TetrisPiece{
         width:1,
         height:4,
-        name:"Stick",
+        name:"I",
         Points: []Point{
             Point{0,0},
             Point{0,1},
@@ -51,6 +51,6 @@ func (game *TetrisGame) Start() {
 func NewTetrisGame() *TetrisGame {
     return &TetrisGame{
         score:0,
-        Level: &Level{number: 1, speed: 1, Piece: Pieces.Box},
+        Level: &Level{number: 1, speed: 1, Piece: Pieces.O},
         Board: NewTetrisBoard()}
 }
