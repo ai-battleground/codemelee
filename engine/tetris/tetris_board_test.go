@@ -187,6 +187,19 @@ func TestTetrisBoard(t *testing.T) {
                             So(nil, ShouldNotBeNil)
                     }
                 })
+
+                Convey("the line should be removed and higher lines dropped", func() {
+                    select {
+                        case _ = <-board.Cleared:
+                        case <-time.After(time.Second * 1):
+                    }
+                    So(board.plane[5], ShouldResemble, row("          "))
+                    So(board.plane[4], ShouldResemble, row("         *"))
+                    So(board.plane[3], ShouldResemble, row("         *"))
+                    So(board.plane[2], ShouldResemble, row("******** *"))
+                    So(board.plane[1], ShouldResemble, row("* ********"))
+                    So(board.plane[0], ShouldResemble, row("* ********"))
+                })
             })
         })
     })

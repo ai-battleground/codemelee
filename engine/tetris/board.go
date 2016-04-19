@@ -52,7 +52,7 @@ func (board *Board) Anchor() {
         board.space(translate(board.PiecePosition, p)).empty = false
     }
     go func() { board.Anchored <- anchoredPiece }()
-    go board.ClearLines()
+    board.ClearLines()
 }
 
 func (board *Board) ClearLines() {
@@ -63,7 +63,11 @@ func (board *Board) ClearLines() {
         }
     }
     if len(completedLines) > 0 {
-        board.Cleared <- completedLines
+        // iterate in reverse so that the row indices stay accurate
+        for i := len(completedLines) - 1; i>=0; i-- {
+            board.clearLine(completedLines[i])
+        }
+        go func() { board.Cleared <- completedLines }()
     }
 }
 
@@ -111,6 +115,17 @@ func (board *Board) space(point Point) *Space {
     return &board.plane[point.y][point.x]
 }
 
+func (board *Board) clearLine(y int) {
+    for i := y; i<19; i++ {
+        for j := range board.plane[i] {
+            board.plane[i][j].empty = board.plane[i + 1][j].empty
+        }
+    }
+    for _, topSpace := range board.plane[19] {
+        topSpace.empty = true
+    }
+}
+
 func translate(origin Point, vector Point) Point {
     return Point{origin.x + vector.x, origin.y + vector.y}
 }
@@ -135,11 +150,16 @@ func NewTetrisBoard() *Board {
 
 func NewPlane(width int, height int) [][]Space {
     plane := make([][]Space, height)
-    for i, _ := range plane {
-        plane[i] = make([]Space, width)
-        for j, _ := range plane[i] {
-            plane[i][j] = Space{empty:true}
-        }
+    for i := range plane {
+        plane[i] = newRow(width)
     }
     return plane
+}
+
+func newRow(width int) []Space {
+    row := make([]Space, width)
+    for i := range row {
+        row[i] = Space{empty:true}
+    }
+    return row
 }
