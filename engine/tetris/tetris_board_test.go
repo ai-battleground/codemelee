@@ -180,8 +180,9 @@ func TestTetrisBoard(t *testing.T) {
 
                 Convey("the line should be sent to the cleared channel", func() {
                     select {
-                        case clearedLine := <-board.Cleared:
-                            So(clearedLine, ShouldEqual, 2)
+                        case clearedLines := <-board.Cleared:
+                            So(len(clearedLines), ShouldEqual, 1)
+                            So(clearedLines[0], ShouldEqual, 2)
                         case <-time.After(time.Second * 1):
                             So(nil, ShouldNotBeNil)
                     }

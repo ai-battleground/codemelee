@@ -10,7 +10,7 @@ type Board struct {
     Piece *TetrisPiece
     PiecePosition Point
     Anchored chan *TetrisPiece
-    Cleared chan int
+    Cleared chan []int
 }
 
 type Point struct {
@@ -56,10 +56,14 @@ func (board *Board) Anchor() {
 }
 
 func (board *Board) ClearLines() {
+    completedLines := []int{}
     for i, row := range board.plane {
         if isComplete(row) {
-            board.Cleared <- i
+            completedLines = append(completedLines, i)
         }
+    }
+    if len(completedLines) > 0 {
+        board.Cleared <- completedLines
     }
 }
 
@@ -126,7 +130,7 @@ func NewTetrisBoard() *Board {
         height:20, 
         plane: NewPlane(10, 20), 
         Anchored: make(chan *TetrisPiece),
-        Cleared: make(chan int)}
+        Cleared: make(chan []int)}
 }
 
 func NewPlane(width int, height int) [][]Space {
