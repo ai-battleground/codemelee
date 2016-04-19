@@ -173,9 +173,10 @@ func TestTetrisBoard(t *testing.T) {
             board.plane[1] = row("* ********")
             board.plane[0] = row("* ********")
 
+            board.Piece = Pieces.I
+            board.PiecePosition = Point{9,15}
+
             Convey("a single line", func() {
-                board.Piece = Pieces.I
-                board.PiecePosition = Point{9,15}
                 board.Drop()
 
                 Convey("the line should be sent to the cleared channel", func() {
@@ -197,6 +198,42 @@ func TestTetrisBoard(t *testing.T) {
                     So(board.plane[4], ShouldResemble, row("         *"))
                     So(board.plane[3], ShouldResemble, row("         *"))
                     So(board.plane[2], ShouldResemble, row("******** *"))
+                    So(board.plane[1], ShouldResemble, row("* ********"))
+                    So(board.plane[0], ShouldResemble, row("* ********"))
+                })
+            })
+
+            Convey("three lines", func() {
+                board.plane[4] = row("********* ")
+                board.plane[3] = row("********* ")
+                // already there:     *********
+                // already there:     * ********
+                // already there:     * ********
+
+                board.Drop()
+
+
+                Convey("the lines should be sent to the cleared channel", func() {
+                    select {
+                        case clearedLines := <-board.Cleared:
+                            So(len(clearedLines), ShouldEqual, 3)
+                            So(clearedLines[0], ShouldEqual, 2)
+                            So(clearedLines[1], ShouldEqual, 3)
+                            So(clearedLines[2], ShouldEqual, 4)
+                        case <-time.After(time.Second * 1):
+                            So(nil, ShouldNotBeNil)
+                    }
+                })
+
+                Convey("the lines should be removed and higher lines dropped", func() {
+                    select {
+                        case _ = <-board.Cleared:
+                        case <-time.After(time.Second * 1):
+                    }
+                    So(board.plane[5], ShouldResemble, row("          "))
+                    So(board.plane[4], ShouldResemble, row("          "))
+                    So(board.plane[3], ShouldResemble, row("          "))
+                    So(board.plane[2], ShouldResemble, row("         *"))
                     So(board.plane[1], ShouldResemble, row("* ********"))
                     So(board.plane[0], ShouldResemble, row("* ********"))
                 })
