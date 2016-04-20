@@ -49,7 +49,7 @@ func TestTetrisGame(t *testing.T) {
                 })
 
                 Convey("should position the piece at the top", func() {
-                    So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
+                    So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.Height())
                 })
             })
 
@@ -62,7 +62,7 @@ func TestTetrisGame(t *testing.T) {
 
             Convey("a new piece should be staged", func() {
                 So(game.Board.Piece, ShouldEqual, Pieces.O)
-                So(game.Board.PiecePosition.y, ShouldEqual, game.Board.height - game.Board.Piece.height)
+                So(game.Board.PiecePosition.y, ShouldEqual, game.Board.height - game.Board.Piece.Height())
             })
         })
     })

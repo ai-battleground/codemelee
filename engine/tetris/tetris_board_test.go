@@ -71,7 +71,7 @@ func TestTetrisBoard(t *testing.T) {
             board.Stage(Pieces.O)
             
             Convey("the piece should be positioned at the top", func() {
-                So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.height)
+                So(board.PiecePosition.y, ShouldEqual, board.height - board.Piece.Height())
             })
 
             Convey("the piece should be centered", func() {
@@ -95,7 +95,9 @@ func TestTetrisBoard(t *testing.T) {
             })
 
             Convey("with wider piece against the wall, the piece should not move", func() {
-                board.Piece = &TetrisPiece{width:4, name: "TestPiece", Points:[]Point{Point{0,0},Point{3,0}}}
+                board.Piece = &TetrisPiece{Name: "TestPiece", Orientations:[][4]Point{}}
+                board.Piece.Orientations = append(board.Piece.Orientations, 
+                    [4]Point{ Point{0,0}, Point{1,0}, Point{2,0}, Point{3,0} })
                 board.PiecePosition = Point{7, 10}
                 board.MoveRight()
                 So(board.PiecePosition.x, ShouldEqual, 7)
@@ -129,6 +131,20 @@ func TestTetrisBoard(t *testing.T) {
                 board.plane[11] = row("  **      ")
                 board.MoveLeft()
                 So(board.PiecePosition.x, ShouldEqual, 4)
+            })
+        })
+
+        Convey("when the player rotates", func() {
+            Convey("an I piece", func() {
+                board.Piece = Pieces.I
+                Convey("once", func() {
+                    board.Rotate()
+
+                    Convey("the piece should be horizontal", func() {
+                        So(board.Piece.Points(board.PieceOrientation), ShouldResemble, 
+                            [4]Point{Point{0,0},Point{1,0},Point{2,0},Point{3,0}})
+                    })
+                })
             })
         })
 

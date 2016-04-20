@@ -12,9 +12,25 @@ type Level struct {
 }
 
 type TetrisPiece struct {
-    width, height int
-    name string
-    Points []Point
+    Name string
+    Orientations [][4]Point
+}
+
+func (piece TetrisPiece) Height() int {
+    var low, high int
+    for _, point := range piece.Points(0) {
+        if point.y < low {
+            low = point.y
+        }
+        if point.y > high {
+            high = point.y
+        }
+    }
+    return high - low
+}
+
+func (piece TetrisPiece) Points(orientation int) [4]Point {
+    return piece.Orientations[orientation]
 }
 
 var Pieces = struct {
@@ -22,23 +38,20 @@ var Pieces = struct {
     I *TetrisPiece
 }{
     &TetrisPiece{
-        width:2,
-        height:2,
-        name:"O", 
-        Points: []Point{
-            Point{0,0},
-            Point{1,0},
-            Point{0,1},
-            Point{1,1}}},
+        Name:"O", 
+        Orientations: [][4]Point{}},
     &TetrisPiece{
-        width:1,
-        height:4,
-        name:"I",
-        Points: []Point{
-            Point{0,0},
-            Point{0,1},
-            Point{0,2},
-            Point{0,3}}}}
+        Name:"I",
+        Orientations: [][4]Point{}}}
+
+func init() {
+    Pieces.O.Orientations = append(Pieces.O.Orientations, 
+        [4]Point{ Point{0,0}, Point{1,0}, Point{0,1}, Point{1,1} })
+    Pieces.I.Orientations = append(Pieces.I.Orientations,
+        [4]Point{ Point{0,0}, Point{0,1}, Point{0,2}, Point{0,3} })
+    Pieces.I.Orientations = append(Pieces.I.Orientations,
+        [4]Point{ Point{0,0}, Point{1,0}, Point{2,0}, Point{3,0} })
+}
 
 func (game *TetrisGame) Start() {
     game.Board.Stage(game.Level.Piece)
