@@ -7,11 +7,15 @@ import (
 type Board struct {
     width, height int
     plane [][]Space
-    Piece *TetrisPiece
-    PieceOrientation int
-    PiecePosition Point
+    Active *ActivePiece
     Anchored chan *TetrisPiece
     Cleared chan []int
+}
+
+type ActivePiece struct {
+    Piece *TetrisPiece
+    Position Point
+    Orientation int
 }
 
 type Point struct {
@@ -43,15 +47,15 @@ func (board *Board) Advance() {
 }
 
 func (board *Board) Stage(piece *TetrisPiece) {
-    board.Piece = piece
-    board.PieceOrientation = 0
-    board.PiecePosition = Point{4, board.height - board.Piece.Height()}
+    board.Active = &ActivePiece{
+        Piece: piece,
+        Position: Point{4, board.height - piece.Height()}}
 }
 
 func (board *Board) Anchor() {
-    anchoredPiece := board.Piece
-    for _, p := range anchoredPiece.Points(board.PieceOrientation) {
-        board.space(translate(board.PiecePosition, p)).empty = false
+    anchoredPiece := board.Active.Piece
+    for _, p := range anchoredPiece.Points(board.Active.Orientation) {
+        board.space(translate(board.Active.Position, p)).empty = false
     }
     go func() { board.Anchored <- anchoredPiece }()
     board.ClearLines()
@@ -82,7 +86,7 @@ func (board *Board) MoveLeft() {
 }
 
 func (board *Board) Rotate() {
-    board.PieceOrientation = (board.PieceOrientation + 1) % len(board.Piece.Orientations)
+    board.Active.Orientation = (board.Active.Orientation + 1) % len(board.Active.Piece.Orientations)
 }
 
 func (board *Board) Drop() {
@@ -94,8 +98,8 @@ func (board *Board) Drop() {
 
 func (board *Board) move(vector Point) {
     if ! board.wouldCollide(vector) {
-        destination := translate(board.PiecePosition, vector)
-        board.PiecePosition = destination
+        destination := translate(board.Active.Position, vector)
+        board.Active.Position = destination
     }
 }
 
@@ -104,8 +108,8 @@ func (board Board) shouldAnchor() bool {
 }
 
 func (board Board) wouldCollide(vector Point) bool {
-    position := translate(board.PiecePosition, vector)
-    for _, p := range board.Piece.Points(board.PieceOrientation) {
+    position := translate(board.Active.Position, vector)
+    for _, p := range board.Active.Piece.Points(board.Active.Orientation) {
         testPoint := translate(position, p)
         if testPoint.y < 0 || testPoint.x < 0 || testPoint.x >= 10 {
             return true
@@ -150,6 +154,7 @@ func NewTetrisBoard() *Board {
         width:10, 
         height:20, 
         plane: NewPlane(10, 20), 
+        Active: &ActivePiece{},
         Anchored: make(chan *TetrisPiece),
         Cleared: make(chan []int)}
 }
