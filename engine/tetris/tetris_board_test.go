@@ -1,267 +1,266 @@
 package tetris
 
 import (
-    "testing"
-    "time"
-    . "github.com/smartystreets/goconvey/convey"
+	. "github.com/smartystreets/goconvey/convey"
+	"testing"
+	"time"
 )
 
 func TestTetrisBoard(t *testing.T) {
 
-    Convey("Given a tetris board", t, func() {
-        board := NewTetrisBoard()
+	Convey("Given a tetris board", t, func() {
+		board := NewTetrisBoard()
 
-        Convey("when time is advanced", func() {
-            Convey("and the piece is clear", func() {
-                board.Active.Piece = Pieces.O
-                board.Active.Position.y = 15
-                board.Advance()
+		Convey("when time is advanced", func() {
+			Convey("and the piece is clear", func() {
+				board.Active.Piece = Pieces.O
+				board.Active.Position.y = 15
+				board.Advance()
 
-                Convey("the piece should descend", func() {
-                    So(board.Active.Position.y, ShouldEqual, 14)
-                })
-            })
+				Convey("the piece should descend", func() {
+					So(board.Active.Position.y, ShouldEqual, 14)
+				})
+			})
 
-            Convey("and the piece is at the bottom", func() {
-                board.Active.Piece = Pieces.O
-                board.Active.Position = Point{3, 0}
-                board.Advance()
+			Convey("and the piece is at the bottom", func() {
+				board.Active.Piece = Pieces.O
+				board.Active.Position = Point{3, 0}
+				board.Advance()
 
-                Convey("the piece should be anchored to the board", func() {
-                    So(board.plane[1], ShouldResemble, row("   **     "))
-                    So(board.plane[0], ShouldResemble, row("   **     "))
-                })
+				Convey("the piece should be anchored to the board", func() {
+					So(board.plane[1], ShouldResemble, row("   **     "))
+					So(board.plane[0], ShouldResemble, row("   **     "))
+				})
 
-                Convey("the piece should be sent to the anchor channel", func() {
-                    select {
-                        case anchoredPiece := <-board.Anchored:
-                            So(anchoredPiece, ShouldEqual, Pieces.O)
-                        case <-time.After(time.Second * 1):
-                            So(nil, ShouldNotBeNil)
-                    }
-                })
-            })
+				Convey("the piece should be sent to the anchor channel", func() {
+					select {
+					case anchoredPiece := <-board.Anchored:
+						So(anchoredPiece, ShouldEqual, Pieces.O)
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
+				})
+			})
 
-            Convey("and the piece is directly above at least one filled space", func() {
-                board.Active.Piece = Pieces.O
-                board.Active.Position = Point{7, 2}
-                //                           xx
-                //                           xx
-                board.plane[1] = row("      **  ")
-                board.plane[0] = row("     **   ")
-                board.Advance()
+			Convey("and the piece is directly above at least one filled space", func() {
+				board.Active.Piece = Pieces.O
+				board.Active.Position = Point{7, 2}
+				//                           xx
+				//                           xx
+				board.plane[1] = row("      **  ")
+				board.plane[0] = row("     **   ")
+				board.Advance()
 
-                Convey("the piece should be anchored to the board", func() {
-                    So(board.plane[3], ShouldResemble, row("       ** "))
-                    So(board.plane[2], ShouldResemble, row("       ** "))
-                })
+				Convey("the piece should be anchored to the board", func() {
+					So(board.plane[3], ShouldResemble, row("       ** "))
+					So(board.plane[2], ShouldResemble, row("       ** "))
+				})
 
-                Convey("the piece should be sent to the anchor channel", func() {
-                    select {
-                        case anchoredPiece := <-board.Anchored:
-                            So(anchoredPiece, ShouldEqual, Pieces.O)
-                        case <-time.After(time.Second * 1):
-                            So(nil, ShouldNotBeNil)
-                    }
-                })
-            })
-        })
+				Convey("the piece should be sent to the anchor channel", func() {
+					select {
+					case anchoredPiece := <-board.Anchored:
+						So(anchoredPiece, ShouldEqual, Pieces.O)
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
+				})
+			})
+		})
 
-        Convey("when a piece is staged", func() {
-            board.Stage(Pieces.O)
-            
-            Convey("the piece should be positioned at the top", func() {
-                So(board.Active.Position.y, ShouldEqual, board.height - board.Active.Piece.Height())
-            })
+		Convey("when a piece is staged", func() {
+			board.Stage(Pieces.O)
 
-            Convey("the piece should be centered", func() {
-                So(board.Active.Position.x, ShouldEqual, 4)
-            })
-        })
+			Convey("the piece should be positioned at the top", func() {
+				So(board.Active.Position.y, ShouldEqual, board.height-board.Active.Piece.Height())
+			})
 
-        Convey("when the player moves right", func() {
-            board.Active.Piece = Pieces.O
+			Convey("the piece should be centered", func() {
+				So(board.Active.Position.x, ShouldEqual, 4)
+			})
+		})
 
-            Convey("the piece should move to the right", func() {
-                board.Active.Position = Point{3, 10}
-                board.MoveRight()
-                So(board.Active.Position.x, ShouldEqual, 4)
-            })
+		Convey("when the player moves right", func() {
+			board.Active.Piece = Pieces.O
 
-            Convey("and the piece is against the wall, the piece should not move", func() {
-                board.Active.Position = Point{9, 10} // box width is 2
-                board.MoveRight()
-                So(board.Active.Position.x, ShouldEqual, 9)
-            })
+			Convey("the piece should move to the right", func() {
+				board.Active.Position = Point{3, 10}
+				board.MoveRight()
+				So(board.Active.Position.x, ShouldEqual, 4)
+			})
 
-            Convey("with wider piece against the wall, the piece should not move", func() {
-                board.Active.Piece = &TetrisPiece{Name: "TestPiece", Orientations:[][4]Point{}}
-                board.Active.Piece.Orientations = append(board.Active.Piece.Orientations, 
-                    [4]Point{ Point{0,0}, Point{1,0}, Point{2,0}, Point{3,0} })
-                board.Active.Position = Point{7, 10}
-                board.MoveRight()
-                So(board.Active.Position.x, ShouldEqual, 7)
-            })
+			Convey("and the piece is against the wall, the piece should not move", func() {
+				board.Active.Position = Point{9, 10} // box width is 2
+				board.MoveRight()
+				So(board.Active.Position.x, ShouldEqual, 9)
+			})
 
-            Convey("and the piece is adjacent to a filled space, the piece should not move", func() {
-                board.Active.Position = Point{0, 10}
-                board.plane[11] = row("  **      ")
-                board.MoveRight()
-                So(board.Active.Position.x, ShouldEqual, 0)
-            })
-        })
+			Convey("with wider piece against the wall, the piece should not move", func() {
+				board.Active.Piece = &TetrisPiece{Name: "TestPiece", Orientations: [][4]Point{}}
+				board.Active.Piece.Orientations = append(board.Active.Piece.Orientations,
+					[4]Point{Point{0, 0}, Point{1, 0}, Point{2, 0}, Point{3, 0}})
+				board.Active.Position = Point{7, 10}
+				board.MoveRight()
+				So(board.Active.Position.x, ShouldEqual, 7)
+			})
 
-        Convey("when the player moves left", func() {
-            board.Active.Piece = Pieces.O
+			Convey("and the piece is adjacent to a filled space, the piece should not move", func() {
+				board.Active.Position = Point{0, 10}
+				board.plane[11] = row("  **      ")
+				board.MoveRight()
+				So(board.Active.Position.x, ShouldEqual, 0)
+			})
+		})
 
-            Convey("the piece should move to the left", func() {
-                board.Active.Position = Point{8, 10}
-                board.MoveLeft()
-                So(board.Active.Position.x, ShouldEqual, 7)
-            })
+		Convey("when the player moves left", func() {
+			board.Active.Piece = Pieces.O
 
-            Convey("and the piece is against the wall, the piece should not move", func() {
-                board.Active.Position = Point{0, 10}
-                board.MoveLeft()
-                So(board.Active.Position.x, ShouldEqual, 0)
-            })
+			Convey("the piece should move to the left", func() {
+				board.Active.Position = Point{8, 10}
+				board.MoveLeft()
+				So(board.Active.Position.x, ShouldEqual, 7)
+			})
 
-            Convey("and the piece is adjacent to a filled space, the piece should not move", func() {
-                board.Active.Position = Point{4, 10}
-                board.plane[11] = row("  **      ")
-                board.MoveLeft()
-                So(board.Active.Position.x, ShouldEqual, 4)
-            })
-        })
+			Convey("and the piece is against the wall, the piece should not move", func() {
+				board.Active.Position = Point{0, 10}
+				board.MoveLeft()
+				So(board.Active.Position.x, ShouldEqual, 0)
+			})
 
-        Convey("when the player rotates", func() {
-            Convey("an I piece", func() {
-                board.Active.Piece = Pieces.I
-                Convey("once", func() {
-                    board.Rotate()
+			Convey("and the piece is adjacent to a filled space, the piece should not move", func() {
+				board.Active.Position = Point{4, 10}
+				board.plane[11] = row("  **      ")
+				board.MoveLeft()
+				So(board.Active.Position.x, ShouldEqual, 4)
+			})
+		})
 
-                    Convey("the piece should be horizontal", func() {
-                        So(board.Active.Piece.Points(board.Active.Orientation), ShouldResemble, 
-                            [4]Point{Point{0,0},Point{1,0},Point{2,0},Point{3,0}})
-                    })
-                })
-            })
-        })
+		Convey("when the player rotates", func() {
+			Convey("an I piece", func() {
+				board.Active.Piece = Pieces.I
+				Convey("once", func() {
+					board.Rotate()
 
-        Convey("when the player drops the piece", func() {
-            board.Active.Piece = Pieces.O
-            board.Active.Position = Point{6, 17}
+					Convey("the piece should be horizontal", func() {
+						So(board.Active.Piece.Points(board.Active.Orientation), ShouldResemble,
+							[4]Point{Point{0, 0}, Point{1, 0}, Point{2, 0}, Point{3, 0}})
+					})
+				})
+			})
+		})
 
-            Convey("with no filled spaces below, the piece should anchor to the floor", func() {
-                board.Drop()
-                select {
-                    case anchoredPiece := <-board.Anchored:
-                        So(anchoredPiece, ShouldEqual, Pieces.O)
-                    case <-time.After(time.Second * 1):
-                        So(nil, ShouldNotBeNil)
-                }
-                So(board.plane[1], ShouldResemble, row("      **  "))
-                So(board.plane[0], ShouldResemble, row("      **  "))
-            })
+		Convey("when the player drops the piece", func() {
+			board.Active.Piece = Pieces.O
+			board.Active.Position = Point{6, 17}
 
-            Convey("with a filled space below, the piece should anchor directly above it", func() {
-                board.plane[1] = row("    ***   ")
-                board.plane[0] = row("    *     ")
-                board.Drop()
-                
-                select {
-                    case anchoredPiece := <-board.Anchored:
-                        So(anchoredPiece, ShouldEqual, Pieces.O)
-                    case <-time.After(time.Second * 1):
-                        So(nil, ShouldNotBeNil)
-                }
+			Convey("with no filled spaces below, the piece should anchor to the floor", func() {
+				board.Drop()
+				select {
+				case anchoredPiece := <-board.Anchored:
+					So(anchoredPiece, ShouldEqual, Pieces.O)
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
+				So(board.plane[1], ShouldResemble, row("      **  "))
+				So(board.plane[0], ShouldResemble, row("      **  "))
+			})
 
-                So(board.plane[3], ShouldResemble, row("      **  "))
-                So(board.plane[2], ShouldResemble, row("      **  "))
-                So(board.plane[1], ShouldResemble, row("    ***   "))
-                So(board.plane[0], ShouldResemble, row("    *     "))
-            })
-        })
+			Convey("with a filled space below, the piece should anchor directly above it", func() {
+				board.plane[1] = row("    ***   ")
+				board.plane[0] = row("    *     ")
+				board.Drop()
 
-        Convey("when the player scores", func() {
-            board.plane[3] = row("********  ")
-            board.plane[2] = row("********* ")
-            board.plane[1] = row("* ********")
-            board.plane[0] = row("* ********")
+				select {
+				case anchoredPiece := <-board.Anchored:
+					So(anchoredPiece, ShouldEqual, Pieces.O)
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
 
-            board.Active.Piece = Pieces.I
-            board.Active.Position = Point{9,15}
+				So(board.plane[3], ShouldResemble, row("      **  "))
+				So(board.plane[2], ShouldResemble, row("      **  "))
+				So(board.plane[1], ShouldResemble, row("    ***   "))
+				So(board.plane[0], ShouldResemble, row("    *     "))
+			})
+		})
 
-            Convey("a single line", func() {
-                board.Drop()
+		Convey("when the player scores", func() {
+			board.plane[3] = row("********  ")
+			board.plane[2] = row("********* ")
+			board.plane[1] = row("* ********")
+			board.plane[0] = row("* ********")
 
-                Convey("the line should be sent to the cleared channel", func() {
-                    select {
-                        case clearedLines := <-board.Cleared:
-                            So(len(clearedLines), ShouldEqual, 1)
-                            So(clearedLines[0], ShouldEqual, 2)
-                        case <-time.After(time.Second * 1):
-                            So(nil, ShouldNotBeNil)
-                    }
-                })
+			board.Active.Piece = Pieces.I
+			board.Active.Position = Point{9, 15}
 
-                Convey("the line should be removed and higher lines dropped", func() {
-                    select {
-                        case _ = <-board.Cleared:
-                        case <-time.After(time.Second * 1):
-                    }
-                    So(board.plane[5], ShouldResemble, row("          "))
-                    So(board.plane[4], ShouldResemble, row("         *"))
-                    So(board.plane[3], ShouldResemble, row("         *"))
-                    So(board.plane[2], ShouldResemble, row("******** *"))
-                    So(board.plane[1], ShouldResemble, row("* ********"))
-                    So(board.plane[0], ShouldResemble, row("* ********"))
-                })
-            })
+			Convey("a single line", func() {
+				board.Drop()
 
-            Convey("three lines", func() {
-                board.plane[4] = row("********* ")
-                board.plane[3] = row("********* ")
-                // already there:     *********
-                // already there:     * ********
-                // already there:     * ********
+				Convey("the line should be sent to the cleared channel", func() {
+					select {
+					case clearedLines := <-board.Cleared:
+						So(len(clearedLines), ShouldEqual, 1)
+						So(clearedLines[0], ShouldEqual, 2)
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
+				})
 
-                board.Drop()
+				Convey("the line should be removed and higher lines dropped", func() {
+					select {
+					case _ = <-board.Cleared:
+					case <-time.After(time.Second * 1):
+					}
+					So(board.plane[5], ShouldResemble, row("          "))
+					So(board.plane[4], ShouldResemble, row("         *"))
+					So(board.plane[3], ShouldResemble, row("         *"))
+					So(board.plane[2], ShouldResemble, row("******** *"))
+					So(board.plane[1], ShouldResemble, row("* ********"))
+					So(board.plane[0], ShouldResemble, row("* ********"))
+				})
+			})
 
+			Convey("three lines", func() {
+				board.plane[4] = row("********* ")
+				board.plane[3] = row("********* ")
+				// already there:     *********
+				// already there:     * ********
+				// already there:     * ********
 
-                Convey("the lines should be sent to the cleared channel", func() {
-                    select {
-                        case clearedLines := <-board.Cleared:
-                            So(len(clearedLines), ShouldEqual, 3)
-                            So(clearedLines[0], ShouldEqual, 2)
-                            So(clearedLines[1], ShouldEqual, 3)
-                            So(clearedLines[2], ShouldEqual, 4)
-                        case <-time.After(time.Second * 1):
-                            So(nil, ShouldNotBeNil)
-                    }
-                })
+				board.Drop()
 
-                Convey("the lines should be removed and higher lines dropped", func() {
-                    select {
-                        case _ = <-board.Cleared:
-                        case <-time.After(time.Second * 1):
-                    }
-                    So(board.plane[5], ShouldResemble, row("          "))
-                    So(board.plane[4], ShouldResemble, row("          "))
-                    So(board.plane[3], ShouldResemble, row("          "))
-                    So(board.plane[2], ShouldResemble, row("         *"))
-                    So(board.plane[1], ShouldResemble, row("* ********"))
-                    So(board.plane[0], ShouldResemble, row("* ********"))
-                })
-            })
-        })
-    })
+				Convey("the lines should be sent to the cleared channel", func() {
+					select {
+					case clearedLines := <-board.Cleared:
+						So(len(clearedLines), ShouldEqual, 3)
+						So(clearedLines[0], ShouldEqual, 2)
+						So(clearedLines[1], ShouldEqual, 3)
+						So(clearedLines[2], ShouldEqual, 4)
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
+				})
+
+				Convey("the lines should be removed and higher lines dropped", func() {
+					select {
+					case _ = <-board.Cleared:
+					case <-time.After(time.Second * 1):
+					}
+					So(board.plane[5], ShouldResemble, row("          "))
+					So(board.plane[4], ShouldResemble, row("          "))
+					So(board.plane[3], ShouldResemble, row("          "))
+					So(board.plane[2], ShouldResemble, row("         *"))
+					So(board.plane[1], ShouldResemble, row("* ********"))
+					So(board.plane[0], ShouldResemble, row("* ********"))
+				})
+			})
+		})
+	})
 }
 
 func row(s string) []Space {
-    row := make([]Space, 10)
-    for i := 0; i<10; i++ {
-        row[i] = Space{empty: s[i] == byte(' ')}
-    }
-    return row
+	row := make([]Space, 10)
+	for i := 0; i < 10; i++ {
+		row[i] = Space{empty: s[i] == byte(' ')}
+	}
+	return row
 }
