@@ -156,6 +156,74 @@ func TestTetrisBoard(t *testing.T) {
 					})
 				})
 			})
+
+			Convey("an O piece", func() {
+				board.Active.Piece = Pieces.O
+
+				Convey("once", func() {
+					board.Rotate()
+
+					Convey("the piece should be the same", func() {
+						So(board.Active.Points(), ShouldResemble,
+							[4]Point{Point{0, 0}, Point{0, 1}, Point{1, 0}, Point{1, 1}})
+					})
+				})
+
+				Convey("twice", func() {
+					board.Rotate()
+					board.Rotate()
+
+					Convey("the piece should be the same", func() {
+						So(board.Active.Points(), ShouldResemble,
+							[4]Point{Point{0, 0}, Point{0, 1}, Point{1, 0}, Point{1, 1}})
+					})
+				})
+			})
+
+			Convey("a T piece", func() {
+				board.Active.Piece = Pieces.T
+
+				Convey("once", func() {
+					board.Rotate()
+
+					Convey("the piece should point right", func() {
+						So(board.Active.Points(), ShouldResemble,
+							[4]Point{Point{0, 0}, Point{0, 1}, Point{0, 2}, Point{1, 1}})
+					})
+				})
+
+				Convey("twice", func() {
+					board.Rotate()
+					board.Rotate()
+
+					Convey("the piece should point down", func() {
+						So(board.Active.Points(), ShouldResemble,
+							[4]Point{Point{0, 1}, Point{1, 0}, Point{1, 1}, Point{2, 1}})
+					})
+				})
+
+				Convey("three times", func() {
+					for i := 0; i < 3; i++ {
+						board.Rotate()
+					}
+
+					Convey("the piece should point left", func() {
+						So(board.Active.Points(), ShouldResemble,
+							[4]Point{Point{0, 1}, Point{1, 0}, Point{1, 1}, Point{1, 2}})
+					})
+				})
+
+				Convey("four times", func() {
+					for i := 0; i < 4; i++ {
+						board.Rotate()
+					}
+
+					Convey("the piece should point up", func() {
+						So(board.Active.Points(), ShouldResemble,
+							[4]Point{Point{0, 0}, Point{1, 0}, Point{1, 1}, Point{2, 0}})
+					})
+				})
+			})
 		})
 
 		Convey("when the player drops the piece", func() {
