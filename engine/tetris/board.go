@@ -38,6 +38,10 @@ func (space Space) String() string {
 	}
 }
 
+func (active ActivePiece) Points() [4]Point {
+	return active.Piece.Orientations[active.Orientation]
+}
+
 func (board *Board) Advance() {
 	if board.shouldAnchor() {
 		board.Anchor()
@@ -53,11 +57,10 @@ func (board *Board) Stage(piece *TetrisPiece) {
 }
 
 func (board *Board) Anchor() {
-	anchoredPiece := board.Active.Piece
-	for _, p := range anchoredPiece.Points(board.Active.Orientation) {
+	for _, p := range board.Active.Points() {
 		board.space(translate(board.Active.Position, p)).empty = false
 	}
-	go func() { board.Anchored <- anchoredPiece }()
+	go func() { board.Anchored <- board.Active.Piece }()
 	board.ClearLines()
 }
 
@@ -109,7 +112,7 @@ func (board Board) shouldAnchor() bool {
 
 func (board Board) wouldCollide(vector Point) bool {
 	position := translate(board.Active.Position, vector)
-	for _, p := range board.Active.Piece.Points(board.Active.Orientation) {
+	for _, p := range board.Active.Points() {
 		testPoint := translate(position, p)
 		if testPoint.y < 0 || testPoint.x < 0 || testPoint.x >= 10 {
 			return true

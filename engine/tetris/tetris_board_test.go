@@ -141,8 +141,18 @@ func TestTetrisBoard(t *testing.T) {
 					board.Rotate()
 
 					Convey("the piece should be horizontal", func() {
-						So(board.Active.Piece.Points(board.Active.Orientation), ShouldResemble,
+						So(board.Active.Points(), ShouldResemble,
 							[4]Point{Point{0, 0}, Point{1, 0}, Point{2, 0}, Point{3, 0}})
+					})
+				})
+
+				Convey("twice", func() {
+					board.Rotate()
+					board.Rotate()
+
+					Convey("the piece should be vertical", func() {
+						So(board.Active.Points(), ShouldResemble,
+							[4]Point{Point{0, 0}, Point{0, 1}, Point{0, 2}, Point{0, 3}})
 					})
 				})
 			})

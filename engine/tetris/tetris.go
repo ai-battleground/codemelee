@@ -18,7 +18,7 @@ type TetrisPiece struct {
 
 func (piece TetrisPiece) Height() int {
 	var low, high int
-	for _, point := range piece.Points(0) {
+	for _, point := range piece.Orientations[0] {
 		if point.y < low {
 			low = point.y
 		}
@@ -27,10 +27,6 @@ func (piece TetrisPiece) Height() int {
 		}
 	}
 	return high - low
-}
-
-func (piece TetrisPiece) Points(orientation int) [4]Point {
-	return piece.Orientations[orientation]
 }
 
 var Pieces = struct {
