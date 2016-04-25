@@ -27,26 +27,31 @@ type shelf struct {
 }
 
 func (g *TetrisGame) Start() {
+	first := g.NextPiece()
 	for i := 0; i < 4; i++ {
-		g.shelf.pieces[i] = g.NextPiece()
+		g.shelf.push(g.NextPiece())
 	}
-	g.Stage(Pieces.O)
+	g.Stage(first)
 	go g.handleAnchored()
 }
 
-func (g *TetrisGame) Shelf() [4]TetrisPiece {
+func (s *shelf) Shelf() [4]TetrisPiece {
 	return [4]TetrisPiece{
-		g.shelf.pieces[g.shelf.head],
-		g.shelf.pieces[(g.shelf.head+1)%4],
-		g.shelf.pieces[(g.shelf.head+2)%4],
-		g.shelf.pieces[(g.shelf.head+3)%4]}
+		s.pieces[s.head],
+		s.pieces[(s.head+1)%4],
+		s.pieces[(s.head+2)%4],
+		s.pieces[(s.head+3)%4]}
+}
+
+func (s *shelf) push(p TetrisPiece) {
+	s.pieces[s.head] = p
+	s.head = (s.head + 1) % 4
 }
 
 func (g *TetrisGame) handleAnchored() {
 	anchoredPiece := <-g.Board.Anchored
 	g.Stage(anchoredPiece)
-	g.shelf.pieces[g.shelf.head] = g.Level.NextPiece()
-	g.shelf.head++
+	g.shelf.push(g.Level.NextPiece())
 
 	go func() { g.ShelfUpdated <- g.Shelf() }()
 }

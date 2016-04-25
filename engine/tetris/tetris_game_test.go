@@ -83,14 +83,14 @@ func TestTetrisGame(t *testing.T) {
 				piece := 0
 				game.Level = Level{0, 0, (func() TetrisPiece {
 					defer func() { piece++ }()
-					return TetrisPiece{Name: fmt.Sprintf("Piece %d", piece)}
+					return TetrisPiece{Name: fmt.Sprintf("Piece %d", piece), Orientations: Pieces.O.Orientations}
 				})}
 
 				game.Start()
 				shelf := game.Shelf()
 
 				for i := range shelf {
-					So(shelf[i].Name, ShouldEqual, fmt.Sprintf("Piece %d", i))
+					So(shelf[i].Name, ShouldEqual, fmt.Sprintf("Piece %d", i + 1)) // Piece 0 was already staged
 				}
 			})
 
