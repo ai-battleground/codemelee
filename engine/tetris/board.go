@@ -20,40 +20,40 @@ func NewTetrisBoard() *Board {
 		Cleared:   make(chan []int)}
 }
 
-func (board *Board) Advance() {
-	if board.shouldAnchor() {
-		board.anchor()
+func (b *Board) Advance() {
+	if b.shouldAnchor() {
+		b.anchor()
 	} else {
-		board.move(Point{0, -1})
+		b.move(Point{0, -1})
 	}
 }
 
-func (board *Board) Stage(piece TetrisPiece) {
-	stagePosition := Point{4, board.height - piece.Height()}
+func (b *Board) Stage(piece TetrisPiece) {
+	stagePosition := Point{4, b.height - piece.Height()}
 
-	board.Active = &ActivePiece{piece, stagePosition, 0}
+	b.Active = &ActivePiece{piece, stagePosition, 0}
 
-	if board.anyPointsCollide(stagePosition, piece.Orientations[0]) {
-		go func() { board.Collision <- piece }()
-		for y := range board.plane {
-			for x := range board.plane[y] {
-				board.plane[y][x].empty = true
+	if b.anyPointsCollide(stagePosition, piece.Orientations[0]) {
+		go func() { b.Collision <- piece }()
+		for y := range b.plane {
+			for x := range b.plane[y] {
+				b.plane[y][x].empty = true
 			}
 		}
 	}
 }
 
-func (board *Board) anchor() {
-	for _, p := range board.Active.Points() {
-		board.space(translate(board.Active.Position, p)).empty = false
+func (b *Board) anchor() {
+	for _, p := range b.Active.Points() {
+		b.space(translate(b.Active.Position, p)).empty = false
 	}
-	go func() { board.Anchored <- board.Active.TetrisPiece }()
-	board.clearLines()
+	go func() { b.Anchored <- b.Active.TetrisPiece }()
+	b.clearLines()
 }
 
-func (board *Board) clearLines() {
+func (b *Board) clearLines() {
 	completedLines := []int{}
-	for i, row := range board.plane {
+	for i, row := range b.plane {
 		if isComplete(row) {
 			completedLines = append(completedLines, i)
 		}
@@ -61,53 +61,53 @@ func (board *Board) clearLines() {
 	if len(completedLines) > 0 {
 		// iterate in reverse so that the row indices stay accurate
 		for i := len(completedLines) - 1; i >= 0; i-- {
-			board.clearLine(completedLines[i])
+			b.clearLine(completedLines[i])
 		}
-		go func() { board.Cleared <- completedLines }()
+		go func() { b.Cleared <- completedLines }()
 	}
 }
 
-func (board *Board) move(vector Point) {
-	if !board.wouldCollide(vector) {
-		destination := translate(board.Active.Position, vector)
-		board.Active.Position = destination
+func (b *Board) move(vector Point) {
+	if !b.wouldCollide(vector) {
+		destination := translate(b.Active.Position, vector)
+		b.Active.Position = destination
 	}
 }
 
-func (board Board) shouldAnchor() bool {
-	return board.wouldCollide(Point{0, -1})
+func (b Board) shouldAnchor() bool {
+	return b.wouldCollide(Point{0, -1})
 }
 
-func (board Board) wouldCollide(vector Point) bool {
-	position := translate(board.Active.Position, vector)
-	return board.anyPointsCollide(position, board.Active.Points())
+func (b Board) wouldCollide(vector Point) bool {
+	position := translate(b.Active.Position, vector)
+	return b.anyPointsCollide(position, b.Active.Points())
 }
 
-func (board Board) anyPointsCollide(position Point, points [4]Point) bool {
+func (b Board) anyPointsCollide(position Point, points [4]Point) bool {
 	for _, p := range points {
 		testPoint := translate(position, p)
 		if testPoint.y < 0 || testPoint.x < 0 || testPoint.x >= 10 {
 			return true
 		}
-		if !board.space(testPoint).empty {
+		if !b.space(testPoint).empty {
 			return true
 		}
 	}
 	return false
 }
 
-func (board *Board) space(point Point) *Space {
-	return &board.plane[point.y][point.x]
+func (b *Board) space(point Point) *Space {
+	return &b.plane[point.y][point.x]
 }
 
-func (board *Board) clearLine(y int) {
+func (b *Board) clearLine(y int) {
 	for i := y; i < 19; i++ {
-		for j := range board.plane[i] {
-			board.plane[i][j].empty = board.plane[i+1][j].empty
+		for j := range b.plane[i] {
+			b.plane[i][j].empty = b.plane[i+1][j].empty
 		}
 	}
-	for x := range board.plane[19] {
-		board.plane[19][x].empty = true
+	for x := range b.plane[19] {
+		b.plane[19][x].empty = true
 	}
 }
 
