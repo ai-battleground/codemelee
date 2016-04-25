@@ -9,9 +9,20 @@ type Board struct {
 	Collision     chan TetrisPiece
 }
 
+func NewTetrisBoard() *Board {
+	return &Board{
+		width:     10,
+		height:    20,
+		plane:     newPlane(10, 20),
+		Active:    &ActivePiece{},
+		Anchored:  make(chan TetrisPiece),
+		Collision: make(chan TetrisPiece),
+		Cleared:   make(chan []int)}
+}
+
 func (board *Board) Advance() {
 	if board.shouldAnchor() {
-		board.Anchor()
+		board.anchor()
 	} else {
 		board.move(Point{0, -1})
 	}
@@ -32,15 +43,15 @@ func (board *Board) Stage(piece TetrisPiece) {
 	}
 }
 
-func (board *Board) Anchor() {
+func (board *Board) anchor() {
 	for _, p := range board.Active.Points() {
 		board.space(translate(board.Active.Position, p)).empty = false
 	}
 	go func() { board.Anchored <- board.Active.TetrisPiece }()
-	board.ClearLines()
+	board.clearLines()
 }
 
-func (board *Board) ClearLines() {
+func (board *Board) clearLines() {
 	completedLines := []int{}
 	for i, row := range board.plane {
 		if isComplete(row) {
@@ -54,25 +65,6 @@ func (board *Board) ClearLines() {
 		}
 		go func() { board.Cleared <- completedLines }()
 	}
-}
-
-func (board *Board) MoveRight() {
-	board.move(Point{1, 0})
-}
-
-func (board *Board) MoveLeft() {
-	board.move(Point{-1, 0})
-}
-
-func (board *Board) Rotate() {
-	board.Active.Orientation = (board.Active.Orientation + 1) % len(board.Active.Orientations)
-}
-
-func (board *Board) Drop() {
-	for !board.shouldAnchor() {
-		board.move(Point{0, -1})
-	}
-	board.Anchor()
 }
 
 func (board *Board) move(vector Point) {
@@ -132,18 +124,7 @@ func isComplete(row []Space) bool {
 	return true
 }
 
-func NewTetrisBoard() *Board {
-	return &Board{
-		width:     10,
-		height:    20,
-		plane:     NewPlane(10, 20),
-		Active:    &ActivePiece{},
-		Anchored:  make(chan TetrisPiece),
-		Collision: make(chan TetrisPiece),
-		Cleared:   make(chan []int)}
-}
-
-func NewPlane(width int, height int) [][]Space {
+func newPlane(width int, height int) [][]Space {
 	plane := make([][]Space, height)
 	for i := range plane {
 		plane[i] = newRow(width)
