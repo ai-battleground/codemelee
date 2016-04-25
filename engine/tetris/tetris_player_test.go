@@ -98,6 +98,24 @@ func TestTetrisPlayer(t *testing.T) {
 						So(board.Active.Position.x, ShouldEqual, 6)
 					})
 				})
+
+				Convey("once, when there's not enough room", func() {
+					board.Active.Position = Point{1, 10}
+					board.plane[11] = row("   **     ")
+					board.plane[10] = row("*  ***    ")
+					board.plane[9] = row("*  **     ")
+					board.plane[8] = row("*****     ")
+					// and so on
+					board.Rotate()
+
+					Convey("the piece should not rotate", func() {
+						So(board.Active.Orientation, ShouldEqual, 0)
+					})
+
+					Convey("the piece should not move", func() {
+						So(board.Active.Position.x, ShouldEqual, 1)
+					})
+				})
 			})
 
 			Convey("an O piece", func() {

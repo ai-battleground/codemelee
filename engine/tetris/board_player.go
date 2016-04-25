@@ -12,11 +12,14 @@ func (board *Board) Rotate() {
 	targetOrientation := (board.Active.Orientation + 1) % len(board.Active.Orientations)
 	targetPosition := board.Active.Position
 
-	for board.anyPointsCollide(targetPosition, board.Active.Orientations[targetOrientation]) {
+	for board.anyPointsCollide(targetPosition, board.Active.Orientations[targetOrientation]) &&
+		targetPosition.x >= 0 {
 		targetPosition.x--
 	}
-	board.Active.Orientation = targetOrientation
-	board.Active.Position = targetPosition
+	if targetPosition.x >= 0 {
+		board.Active.Orientation = targetOrientation
+		board.Active.Position = targetPosition
+	}
 }
 
 func (board *Board) Drop() {
