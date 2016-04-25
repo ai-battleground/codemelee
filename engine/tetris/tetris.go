@@ -8,7 +8,7 @@ type TetrisGame struct {
 
 type Level struct {
 	number, speed int
-	Piece         *TetrisPiece
+	Piece         TetrisPiece
 }
 
 func (game *TetrisGame) Start() {

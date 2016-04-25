@@ -1,46 +1,12 @@
 package tetris
 
-import (
-	"fmt"
-)
-
 type Board struct {
 	width, height int
 	plane         [][]Space
 	Active        *ActivePiece
-	Anchored      chan *TetrisPiece
+	Anchored      chan TetrisPiece
 	Cleared       chan []int
-	Collision     chan *TetrisPiece
-}
-
-type ActivePiece struct {
-	Piece       *TetrisPiece
-	Position    Point
-	Orientation int
-}
-
-type Point struct {
-	x, y int
-}
-
-func (point Point) String() string {
-	return fmt.Sprintf("(%d, %d)", point.x, point.y)
-}
-
-type Space struct {
-	empty bool
-}
-
-func (space Space) String() string {
-	if space.empty {
-		return " "
-	} else {
-		return "*"
-	}
-}
-
-func (active ActivePiece) Points() [4]Point {
-	return active.Piece.Orientations[active.Orientation]
+	Collision     chan TetrisPiece
 }
 
 func (board *Board) Advance() {
@@ -51,12 +17,10 @@ func (board *Board) Advance() {
 	}
 }
 
-func (board *Board) Stage(piece *TetrisPiece) {
+func (board *Board) Stage(piece TetrisPiece) {
 	stagePosition := Point{4, board.height - piece.Height()}
 
-	board.Active = &ActivePiece{
-		Piece:    piece,
-		Position: stagePosition}
+	board.Active = &ActivePiece{piece, stagePosition, 0}
 
 	if board.anyPointsCollide(stagePosition, piece.Orientations[0]) {
 		go func() { board.Collision <- piece }()
@@ -72,7 +36,7 @@ func (board *Board) Anchor() {
 	for _, p := range board.Active.Points() {
 		board.space(translate(board.Active.Position, p)).empty = false
 	}
-	go func() { board.Anchored <- board.Active.Piece }()
+	go func() { board.Anchored <- board.Active.TetrisPiece }()
 	board.ClearLines()
 }
 
@@ -101,7 +65,7 @@ func (board *Board) MoveLeft() {
 }
 
 func (board *Board) Rotate() {
-	board.Active.Orientation = (board.Active.Orientation + 1) % len(board.Active.Piece.Orientations)
+	board.Active.Orientation = (board.Active.Orientation + 1) % len(board.Active.Orientations)
 }
 
 func (board *Board) Drop() {
@@ -174,8 +138,8 @@ func NewTetrisBoard() *Board {
 		height:    20,
 		plane:     NewPlane(10, 20),
 		Active:    &ActivePiece{},
-		Anchored:  make(chan *TetrisPiece),
-		Collision: make(chan *TetrisPiece),
+		Anchored:  make(chan TetrisPiece),
+		Collision: make(chan TetrisPiece),
 		Cleared:   make(chan []int)}
 }
 

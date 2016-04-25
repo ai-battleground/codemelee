@@ -1,5 +1,9 @@
 package tetris
 
+import (
+	"fmt"
+)
+
 type TetrisPiece struct {
 	Name         string
 	Orientations [][4]Point
@@ -18,18 +22,48 @@ func (piece TetrisPiece) Height() int {
 	return high - low + 1
 }
 
+type ActivePiece struct {
+	TetrisPiece
+	Position    Point
+	Orientation int
+}
+
+type Point struct {
+	x, y int
+}
+
+func (point Point) String() string {
+	return fmt.Sprintf("(%d, %d)", point.x, point.y)
+}
+
+type Space struct {
+	empty bool
+}
+
+func (space Space) String() string {
+	if space.empty {
+		return " "
+	} else {
+		return "*"
+	}
+}
+
+func (active ActivePiece) Points() [4]Point {
+	return active.Orientations[active.Orientation]
+}
+
 var Pieces = struct {
-	O *TetrisPiece
-	I *TetrisPiece
-	T *TetrisPiece
+	O TetrisPiece
+	I TetrisPiece
+	T TetrisPiece
 }{
-	&TetrisPiece{
+	TetrisPiece{
 		Name:         "O",
 		Orientations: [][4]Point{}},
-	&TetrisPiece{
+	TetrisPiece{
 		Name:         "I",
 		Orientations: [][4]Point{}},
-	&TetrisPiece{
+	TetrisPiece{
 		Name:         "T",
 		Orientations: [][4]Point{}}}
 
