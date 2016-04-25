@@ -332,6 +332,29 @@ func TestTetrisBoard(t *testing.T) {
 				})
 			})
 		})
+
+		Convey("when a piece is staged that would collide", func() {
+			for i := 0; i < 20; i++ {
+				board.plane[i] = row("    **    ")
+			}
+
+			board.Stage(Pieces.O)
+
+			Convey("the piece should be sent to the collision channel", func() {
+				select {
+				case collision := <-board.Collision:
+					So(collision, ShouldEqual, Pieces.O)
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
+			})
+
+			Convey("the board is cleared", func() {
+				for i := 0; i < 20; i++ {
+					So(board.plane[i], ShouldResemble, row("          "))
+				}
+			})
+		})
 	})
 }
 

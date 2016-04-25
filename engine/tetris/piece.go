@@ -15,7 +15,7 @@ func (piece TetrisPiece) Height() int {
 			high = point.y
 		}
 	}
-	return high - low
+	return high - low + 1
 }
 
 var Pieces = struct {

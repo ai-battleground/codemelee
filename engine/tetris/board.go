@@ -10,6 +10,7 @@ type Board struct {
 	Active        *ActivePiece
 	Anchored      chan *TetrisPiece
 	Cleared       chan []int
+	Collision     chan *TetrisPiece
 }
 
 type ActivePiece struct {
@@ -51,9 +52,20 @@ func (board *Board) Advance() {
 }
 
 func (board *Board) Stage(piece *TetrisPiece) {
+	stagePosition := Point{4, board.height - piece.Height()}
+
 	board.Active = &ActivePiece{
 		Piece:    piece,
-		Position: Point{4, board.height - piece.Height()}}
+		Position: stagePosition}
+
+	if board.anyPointsCollide(stagePosition, piece.Orientations[0]) {
+		go func() { board.Collision <- piece }()
+		for y := range board.plane {
+			for x := range board.plane[y] {
+				board.plane[y][x].empty = true
+			}
+		}
+	}
 }
 
 func (board *Board) Anchor() {
@@ -112,7 +124,11 @@ func (board Board) shouldAnchor() bool {
 
 func (board Board) wouldCollide(vector Point) bool {
 	position := translate(board.Active.Position, vector)
-	for _, p := range board.Active.Points() {
+	return board.anyPointsCollide(position, board.Active.Points())
+}
+
+func (board Board) anyPointsCollide(position Point, points [4]Point) bool {
+	for _, p := range points {
 		testPoint := translate(position, p)
 		if testPoint.y < 0 || testPoint.x < 0 || testPoint.x >= 10 {
 			return true
@@ -134,8 +150,8 @@ func (board *Board) clearLine(y int) {
 			board.plane[i][j].empty = board.plane[i+1][j].empty
 		}
 	}
-	for _, topSpace := range board.plane[19] {
-		topSpace.empty = true
+	for x := range board.plane[19] {
+		board.plane[19][x].empty = true
 	}
 }
 
@@ -154,12 +170,13 @@ func isComplete(row []Space) bool {
 
 func NewTetrisBoard() *Board {
 	return &Board{
-		width:    10,
-		height:   20,
-		plane:    NewPlane(10, 20),
-		Active:   &ActivePiece{},
-		Anchored: make(chan *TetrisPiece),
-		Cleared:  make(chan []int)}
+		width:     10,
+		height:    20,
+		plane:     NewPlane(10, 20),
+		Active:    &ActivePiece{},
+		Anchored:  make(chan *TetrisPiece),
+		Collision: make(chan *TetrisPiece),
+		Cleared:   make(chan []int)}
 }
 
 func NewPlane(width int, height int) [][]Space {
