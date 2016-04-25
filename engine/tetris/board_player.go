@@ -9,7 +9,14 @@ func (board *Board) MoveLeft() {
 }
 
 func (board *Board) Rotate() {
-	board.Active.Orientation = (board.Active.Orientation + 1) % len(board.Active.Orientations)
+	targetOrientation := (board.Active.Orientation + 1) % len(board.Active.Orientations)
+	targetPosition := board.Active.Position
+
+	for board.anyPointsCollide(targetPosition, board.Active.Orientations[targetOrientation]) {
+		targetPosition.x--
+	}
+	board.Active.Orientation = targetOrientation
+	board.Active.Position = targetPosition
 }
 
 func (board *Board) Drop() {

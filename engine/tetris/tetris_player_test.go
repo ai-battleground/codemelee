@@ -87,6 +87,17 @@ func TestTetrisPlayer(t *testing.T) {
 							[4]Point{Point{0, 0}, Point{0, 1}, Point{0, 2}, Point{0, 3}})
 					})
 				})
+
+				Convey("once, too close to the right wall", func() {
+					board.Active.Position = Point{9, 10}
+					board.Rotate()
+
+					Convey("the piece should rotate, and move left", func() {
+						So(board.Active.Points(), ShouldResemble,
+							[4]Point{Point{0, 0}, Point{1, 0}, Point{2, 0}, Point{3, 0}})
+						So(board.Active.Position.x, ShouldEqual, 6)
+					})
+				})
 			})
 
 			Convey("an O piece", func() {
