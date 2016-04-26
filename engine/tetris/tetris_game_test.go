@@ -208,7 +208,7 @@ func TestTetrisGame(t *testing.T) {
 					return lines // just so we get a different number for different input
 				}}
 				Convey("for one line", func() {
-					game.Board.Cleared <- []int{0}
+					go func() { game.Board.Cleared <- []int{0} }()
 
 					select {
 					case s := <-game.ScoreChange:
@@ -217,6 +217,21 @@ func TestTetrisGame(t *testing.T) {
 					case <-time.After(time.Second * 1):
 						So(nil, ShouldNotBeNil)
 					}
+
+					Convey("several times", func() {
+						go func() { game.Board.Cleared <- []int{5} }()
+						go func() { game.Board.Cleared <- []int{4} }()
+						go func() { game.Board.Cleared <- []int{2} }()
+						for i := 2; i <= 4; i++ {
+							select {
+							case s := <-game.ScoreChange:
+								So(s, ShouldEqual, i)
+							case <-time.After(time.Second * 1):
+								So(nil, ShouldNotBeNil)
+							}
+						}
+						So(game.score, ShouldEqual, 4)
+					})
 				})
 			})
 		})
