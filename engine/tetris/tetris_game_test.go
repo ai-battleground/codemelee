@@ -124,6 +124,64 @@ func TestTetrisGame(t *testing.T) {
 			})
 		})
 
+		Convey("when a piece collides", func() {
+			game.Start()
+
+			game.shelf.pieces = makeShelf("A", "B", "C", "D")
+
+			game.Level = Level{0, 0, func() TetrisPiece {
+				return TetrisPiece{Name: "X", Orientations: Pieces.O.Orientations}
+			}}
+
+			game.Board.Collision <- Pieces.I
+
+			Convey("a new piece should be staged from the shelf", func() {
+				So(game.Board.Active.Name, ShouldEqual, "A")
+				So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+			})
+
+			Convey("the shelf should load another piece from the level", func() {
+				select {
+				case s := <-game.ShelfUpdated:
+					So(s, ShouldResemble, makeShelf("B", "C", "D", "X"))
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
+
+				So(game.Shelf(), ShouldResemble, makeShelf("B", "C", "D", "X"))
+			})
+
+			Convey("twice", func() {
+				game.Board.Collision <- Pieces.I // second time
+				select {
+				case _ = <-game.ShelfUpdated:
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
+
+				Convey("a new piece should be staged from the shelf", func() {
+					select {
+					case _ = <-game.ShelfUpdated:
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
+					So(game.Board.Active.Name, ShouldEqual, "B")
+					So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+				})
+
+				Convey("the shelf should load another piece from the level", func() {
+					select {
+					case s := <-game.ShelfUpdated:
+						So(s, ShouldResemble, makeShelf("C", "D", "X", "X"))
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
+
+					So(game.Shelf(), ShouldResemble, makeShelf("C", "D", "X", "X"))
+				})
+			})
+		})
+
 		Convey("the shelf", func() {
 
 			Convey("should load 4 pieces from the Level when the game starts", func() {

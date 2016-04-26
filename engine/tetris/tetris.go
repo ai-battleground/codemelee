@@ -33,6 +33,7 @@ func (g *TetrisGame) Start() {
 	}
 	g.Stage(first)
 	go g.handleAnchored()
+	go g.handleCollisions()
 }
 
 func (s *shelf) Shelf() [4]TetrisPiece {
@@ -55,11 +56,22 @@ func (s *shelf) next() TetrisPiece {
 func (g *TetrisGame) handleAnchored() {
 	for {
 		_ = <-g.Board.Anchored
-		g.Stage(g.shelf.next())
-		g.shelf.push(g.Level.NextPiece())
-
-		go func() { g.ShelfUpdated <- g.Shelf() }()
+		g.advancePiece()
 	}
+}
+
+func (g *TetrisGame) handleCollisions() {
+	for {
+		_ = <-g.Board.Collision
+		g.advancePiece()
+	}
+}
+
+func (g *TetrisGame) advancePiece() {
+	g.Stage(g.shelf.next())
+	g.shelf.push(g.Level.NextPiece())
+
+	go func() { g.ShelfUpdated <- g.Shelf() }()
 }
 
 var Levels = [...]Level{
