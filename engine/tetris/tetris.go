@@ -73,8 +73,3 @@ func (g *TetrisGame) advancePiece() {
 
 	go func() { g.ShelfUpdated <- g.Shelf() }()
 }
-
-var Levels = [...]Level{
-	Level{number: 1, speed: 1, NextPiece: func() TetrisPiece {
-		return Pieces.O
-	}}}
