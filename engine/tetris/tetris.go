@@ -73,8 +73,8 @@ func (g *TetrisGame) handleCollisions() {
 
 func (g *TetrisGame) handleClearedLines() {
 	for {
-		_ = <-g.Board.Cleared
-		g.score += 1
+		lines := <-g.Board.Cleared
+		g.score += g.Level.Score(len(lines))
 		g.ScoreChange <- g.score
 	}
 }

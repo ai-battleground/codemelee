@@ -136,6 +136,11 @@ func TestTetrisGame(t *testing.T) {
 			game.Board.Collision <- Pieces.I
 
 			Convey("a new piece should be staged from the shelf", func() {
+				select {
+				case _ = <-game.ShelfUpdated:
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
 				So(game.Board.Active.Name, ShouldEqual, "A")
 				So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
 			})
@@ -205,7 +210,7 @@ func TestTetrisGame(t *testing.T) {
 
 			Convey("the score increases according to the level", func() {
 				game.Level = Level{0, 0, func() TetrisPiece { return Pieces.O }, func(lines int) int {
-					return lines // just so we get a different number for different input
+					return lines * lines // just so we get a different number for different input
 				}}
 				Convey("for one line", func() {
 					go func() { game.Board.Cleared <- []int{0} }()
@@ -232,6 +237,18 @@ func TestTetrisGame(t *testing.T) {
 						}
 						So(game.score, ShouldEqual, 4)
 					})
+				})
+
+				Convey("for two lines", func() {
+					go func() { game.Board.Cleared <- []int{2, 3} }()
+
+					select {
+					case s := <-game.ScoreChange:
+						So(s, ShouldEqual, 4)
+						So(game.score, ShouldEqual, 4)
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
 				})
 			})
 		})

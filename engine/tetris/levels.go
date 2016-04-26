@@ -6,5 +6,5 @@ var Levels = [...]Level{
 			return Pieces.O
 		},
 		Score: func(lines int) int {
-			return lines ^ 2
+			return lines * lines
 		}}}
