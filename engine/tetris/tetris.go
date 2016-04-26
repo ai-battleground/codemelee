@@ -6,6 +6,7 @@ type TetrisGame struct {
 	Level
 	*Board
 	ShelfUpdated chan [4]TetrisPiece
+	ScoreChange  chan int
 }
 
 func NewTetrisGame() *TetrisGame {
@@ -13,12 +14,14 @@ func NewTetrisGame() *TetrisGame {
 		score:        0,
 		Level:        Levels[0],
 		Board:        NewTetrisBoard(),
-		ShelfUpdated: make(chan [4]TetrisPiece)}
+		ShelfUpdated: make(chan [4]TetrisPiece),
+		ScoreChange:  make(chan int)}
 }
 
 type Level struct {
 	number, speed int
 	NextPiece     func() TetrisPiece
+	Score         func(lines int) int
 }
 
 type shelf struct {
@@ -34,6 +37,7 @@ func (g *TetrisGame) Start() {
 	g.Stage(first)
 	go g.handleAnchored()
 	go g.handleCollisions()
+	go g.handleClearedLines()
 }
 
 func (s *shelf) Shelf() [4]TetrisPiece {
@@ -65,6 +69,12 @@ func (g *TetrisGame) handleCollisions() {
 		_ = <-g.Board.Collision
 		g.advancePiece()
 	}
+}
+
+func (g *TetrisGame) handleClearedLines() {
+	lines := <-g.Board.Cleared
+	g.score = 1
+	g.ScoreChange <- g.score
 }
 
 func (g *TetrisGame) advancePiece() {
