@@ -69,11 +69,58 @@ func TestTetrisGame(t *testing.T) {
 		Convey("when a piece is anchored", func() {
 			game.Start()
 
-			game.Board.Anchored <- Pieces.O
+			game.shelf.pieces = makeShelf("A", "B", "C", "D")
 
-			Convey("a new piece should be staged", func() {
-				So(game.Board.Active.TetrisPiece, ShouldResemble, Pieces.O)
+			game.Level = Level{0, 0, func() TetrisPiece {
+				return TetrisPiece{Name: "X", Orientations: Pieces.O.Orientations}
+			}}
+
+			game.Board.Anchored <- Pieces.I
+
+			Convey("a new piece should be staged from the shelf", func() {
+				So(game.Board.Active.Name, ShouldEqual, "A")
 				So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+			})
+
+			Convey("the shelf should load another piece from the level", func() {
+				select {
+				case s := <-game.ShelfUpdated:
+					So(s, ShouldResemble, makeShelf("B", "C", "D", "X"))
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
+
+				So(game.Shelf(), ShouldResemble, makeShelf("B", "C", "D", "X"))
+			})
+
+			Convey("twice", func() {
+				game.Board.Anchored <- Pieces.I // second time
+				select {
+				case _ = <-game.ShelfUpdated:
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
+
+				Convey("a new piece should be staged from the shelf", func() {
+					select {
+					case _ = <-game.ShelfUpdated:
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
+					So(game.Board.Active.Name, ShouldEqual, "B")
+					So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+				})
+
+				Convey("the shelf should load another piece from the level", func() {
+					select {
+					case s := <-game.ShelfUpdated:
+						So(s, ShouldResemble, makeShelf("C", "D", "X", "X"))
+					case <-time.After(time.Second * 1):
+						So(nil, ShouldNotBeNil)
+					}
+
+					So(game.Shelf(), ShouldResemble, makeShelf("C", "D", "X", "X"))
+				})
 			})
 		})
 
@@ -93,35 +140,14 @@ func TestTetrisGame(t *testing.T) {
 					So(shelf[i].Name, ShouldEqual, fmt.Sprintf("Piece %d", i+1)) // Piece 0 was already staged
 				}
 			})
-
-			Convey("should load another piece from the Level when a piece is anchored", func() {
-				game.Start()
-
-				game.shelf.pieces = makeShelf("A", "B", "C", "D")
-
-				game.Level = Level{0, 0, func() TetrisPiece {
-					return TetrisPiece{Name: "X"}
-				}}
-
-				go func() { game.Board.Anchored <- TetrisPiece{Name: "A", Orientations: Pieces.O.Orientations} }()
-
-				select {
-				case s := <-game.ShelfUpdated:
-					So(s, ShouldResemble, makeShelf("B", "C", "D", "X"))
-				case <-time.After(time.Second * 1):
-					So(nil, ShouldNotBeNil)
-				}
-
-				So(game.Shelf(), ShouldResemble, makeShelf("B", "C", "D", "X"))
-			})
 		})
 	})
 }
 
 func makeShelf(p1, p2, p3, p4 string) [4]TetrisPiece {
 	return [4]TetrisPiece{
-		TetrisPiece{Name: p1},
-		TetrisPiece{Name: p2},
-		TetrisPiece{Name: p3},
-		TetrisPiece{Name: p4}}
+		TetrisPiece{Name: p1, Orientations: Pieces.O.Orientations},
+		TetrisPiece{Name: p2, Orientations: Pieces.O.Orientations},
+		TetrisPiece{Name: p3, Orientations: Pieces.O.Orientations},
+		TetrisPiece{Name: p4, Orientations: Pieces.O.Orientations}}
 }

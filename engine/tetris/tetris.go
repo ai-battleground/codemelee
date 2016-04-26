@@ -48,12 +48,18 @@ func (s *shelf) push(p TetrisPiece) {
 	s.head = (s.head + 1) % 4
 }
 
-func (g *TetrisGame) handleAnchored() {
-	anchoredPiece := <-g.Board.Anchored
-	g.Stage(anchoredPiece)
-	g.shelf.push(g.Level.NextPiece())
+func (s *shelf) next() TetrisPiece {
+	return s.pieces[s.head]
+}
 
-	go func() { g.ShelfUpdated <- g.Shelf() }()
+func (g *TetrisGame) handleAnchored() {
+	for {
+		_ = <-g.Board.Anchored
+		g.Stage(g.shelf.next())
+		g.shelf.push(g.Level.NextPiece())
+
+		go func() { g.ShelfUpdated <- g.Shelf() }()
+	}
 }
 
 var Levels = [...]Level{
