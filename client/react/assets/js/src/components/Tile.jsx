@@ -10,26 +10,22 @@ export default class Tile extends React.Component {
     this.boardProjection = args.boardProjection;
   }
 
+  projection(context) {
+    context.scale(this.size, this.size);
+    context.translate(this.position.x, this.position.y);
+  }
+
   render(state) {
     const context = state.context;
-    let origin = {
-        x: this.position.x * this.size,
-        y: this.position.y * this.size
-    };
     context.save();
     this.boardProjection(context);
-    context.translate(origin.x, origin.y);
+    this.projection(context);
 
     context.strokeStyle = this.colors.fg;
     context.fillStyle = this.colors.bg;
-    context.lineWidth = 2;
-
-    context.beginPath();
-    context.lineTo(origin.x, origin.y + this.size);
-    context.lineTo(origin.x + this.size, origin.y + this.size);
-    context.lineTo(origin.x + this.size, origin.y);
-    context.lineTo(origin.x, origin.y);
-    context.closePath();
+    context.lineWidth = 2 / this.size;
+    context.strokeRect(0, 0, 1, 1);
+    context.fillRect(0, 0, 1, 1);
 
     context.fill();
     context.stroke();

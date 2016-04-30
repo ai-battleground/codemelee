@@ -37,10 +37,10 @@ export default class Board extends React.Component {
                     y: i % 2
                 },
                 colors: {
-                    fg: "#FF0000",
-                    bg: "#660000"
+                    fg: "#660000",
+                    bg: "#FF0000"
                 },
-                size: 8,
+                size: 18,
                 boardProjection: this.projection.bind(this)
             }));
         }
