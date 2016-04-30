@@ -1,24 +1,22 @@
 import React from 'react';
 
 
-export default class Tile extends React.Component {
-  constructor(args) {
-    super();
-    this.position = args.position;
-    this.colors = args.colors;
-    this.size = args.size;
-    this.boardProjection = args.boardProjection;
+export default class Tile {
+  constructor(props) {
+    this.position = props.position;
+    this.colors = props.colors;
+    this.size = props.size;
+    this.parentProjection = props.projection;
   }
 
   projection(context) {
+    this.parentProjection(context);
     context.scale(this.size, this.size);
     context.translate(this.position.x, this.position.y);
   }
 
-  render(state) {
-    const context = state.context;
+  render(context) {
     context.save();
-    this.boardProjection(context);
     this.projection(context);
 
     context.strokeStyle = this.colors.fg;

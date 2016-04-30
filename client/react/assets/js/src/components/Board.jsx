@@ -1,5 +1,6 @@
 import React from 'react';
-import Tile from './Tile';
+import Piece from './Piece';
+import { Point } from '../graphics'
 
 export default class Board extends React.Component {
     constructor() {
@@ -16,7 +17,6 @@ export default class Board extends React.Component {
           },
           running: false,
           context: null,
-          tiles: [],
           lastAnimated: 0
         };
     }
@@ -30,20 +30,11 @@ export default class Board extends React.Component {
 
     start() {
         this.state.running = true;
-        for (var i = 0; i<4; i++) {
-            this.state.tiles.push(new Tile({
-                position: {
-                    x: Math.floor(i / 2),
-                    y: i % 2
-                },
-                colors: {
-                    fg: "#660000",
-                    bg: "#FF0000"
-                },
-                size: 18,
-                boardProjection: this.projection.bind(this)
-            }));
-        }
+        this.state.piece = new Piece({
+            position: new Point(1, 0),
+            tetromino: Piece.I,
+            projection: this.projection.bind(this)
+        });
     }
 
     update() {
@@ -53,27 +44,21 @@ export default class Board extends React.Component {
         this.projection(context);
 
         context.fillStyle = '#000';
-        context.globalAlpha = 0.4;
         context.fillRect(0, 0, this.state.screen.width, this.state.screen.height);
-        context.globalAlpha = 1;
 
         context.restore();
 
-        this.animate(new Date().getTime());
+        // Render Piece
+        this.state.piece.render(context)
 
-        // Render Tiles
-        for (let tile of this.state.tiles) {
-            tile.render(this.state);
-        }
+        this.animate(new Date().getTime());
         // Next frame
         requestAnimationFrame(() => this.update());
     }
 
     tick() {
         if (this.state.running) {
-            for (let tile of this.state.tiles) {
-                tile.position.y += 1;
-            }
+            this.state.piece.position.y += 1;
         }
     }
 

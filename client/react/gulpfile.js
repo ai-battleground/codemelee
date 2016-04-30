@@ -40,7 +40,6 @@ gulp.task('build', ['copy-css', 'copy-html'], function() {
   });
 
   function bundle() {
-    gutil.log('update event happened I think');
     b.transform(babelify, {presets: ['es2015', 'react']})
       .bundle()
       .on('error',gutil.log)
