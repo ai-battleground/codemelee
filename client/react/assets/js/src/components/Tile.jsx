@@ -7,6 +7,7 @@ export default class Tile extends React.Component {
     this.position = args.position;
     this.colors = args.colors;
     this.size = args.size;
+    this.boardProjection = args.boardProjection;
   }
 
   render(state) {
@@ -16,6 +17,7 @@ export default class Tile extends React.Component {
         y: this.position.y * this.size
     };
     context.save();
+    this.boardProjection(context);
     context.translate(origin.x, origin.y);
 
     context.strokeStyle = this.colors.fg;

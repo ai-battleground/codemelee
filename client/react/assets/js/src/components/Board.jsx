@@ -10,6 +10,10 @@ export default class Board extends React.Component {
             height: 360,
             ratio: window.devicePixelRatio || 1,
           },
+          position: {
+            x: 10,
+            y: 20
+          },
           running: false,
           context: null,
           tiles: [],
@@ -36,7 +40,8 @@ export default class Board extends React.Component {
                     fg: "#FF0000",
                     bg: "#660000"
                 },
-                size: 8
+                size: 8,
+                boardProjection: this.projection.bind(this)
             }));
         }
     }
@@ -45,7 +50,8 @@ export default class Board extends React.Component {
         const context = this.state.context;
         context.save();
 
-        context.translate(10,20);
+        this.projection(context);
+
         context.fillStyle = '#000';
         context.globalAlpha = 0.4;
         context.fillRect(0, 0, this.state.screen.width, this.state.screen.height);
@@ -69,6 +75,10 @@ export default class Board extends React.Component {
                 tile.position.y += 1;
             }
         }
+    }
+
+    projection(context) {
+        context.translate(this.state.position.x, this.state.position.y);
     }
 
     animate(timestamp) {
