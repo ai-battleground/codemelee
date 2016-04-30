@@ -38,6 +38,28 @@ export default class Piece {
     }
   }
 
+  moveLeft() {
+    if (! this.leftLocked) {
+      this.position.x -= 1;
+      this.leftLocked = true;
+    }
+  }
+
+  moveRight() {
+    if (! this.rightLocked) {
+        this.position.x += 1;
+        this.rightLocked = true;
+    }
+  }
+
+  unlockLeft() {
+    this.leftLocked = false;
+  }
+
+  unlockRight() {
+    this.rightLocked = false;
+  }
+
   // Graphics
 
   projection(context) {
@@ -45,9 +67,21 @@ export default class Piece {
     context.translate(this.position.x * cellSize, this.position.y * cellSize);
   }
 
-  render(context) {
+  render(state) {
+    if(state.keys.left){
+      this.moveLeft();
+    } else {
+      this.unlockLeft();
+    }
+    if(state.keys.right){
+      this.moveRight();
+    } else {
+      this.unlockRight();
+    }
+    const context = state.context;
+
     for (let tile of this.tiles) {
-        tile.render(context);
+        tile.render(state);
     }
   }
 }

@@ -15,7 +15,9 @@ export default class Tile {
     context.translate(this.position.x, this.position.y);
   }
 
-  render(context) {
+  render(state) {
+    const context = state.context;
+    
     context.save();
     this.projection(context);
 
