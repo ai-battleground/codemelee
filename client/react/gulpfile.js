@@ -13,14 +13,14 @@ const gutil        = require('gulp-util')
 const watchify     = require('watchify')
 
 gulp.task('lint', function() {
-  gulp.src('assets/js/src/components/CodemeleeTetris.jsx')
+  gulp.src('src/js/src/components/CodemeleeTetris.jsx')
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
 });
 
 gulp.task('copy-css', function() {
-  gulp.src('assets/css/*.css')
+  gulp.src('src/css/*.css')
     .pipe(gulp.dest('dist/css'));
 });
 
@@ -31,7 +31,7 @@ gulp.task('copy-html', function() {
 
 gulp.task('build', ['copy-css', 'copy-html'], function() {
   const b = browserify({
-    entries: 'assets/js/src/components/CodemeleeTetris.jsx',
+    entries: 'src/js/src/components/CodemeleeTetris.jsx',
     extensions: ['.jsx'],
     cache: {},
     packageCache: {},
