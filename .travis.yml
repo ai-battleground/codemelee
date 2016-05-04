@@ -1,6 +1,7 @@
 language: go
 install:
   - go get github.com/smartystreets/goconvey/convey
+  - go get github.com/gorilla/websocket
 go:
   - 1.6
   - tip
