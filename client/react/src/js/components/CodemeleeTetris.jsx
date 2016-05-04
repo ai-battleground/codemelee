@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import Board from './Board';
+import { GameConnection } from '../connection'
 
 export default class App extends React.Component {
     constructor() {

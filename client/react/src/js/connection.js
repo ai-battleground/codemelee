@@ -1,15 +1,15 @@
 export class GameConnection {
     constructor(url) {
-        this.socket = new WebSocket(url)
+        this.socket = new WebSocket(url);
     }
 
     connect() {
-        socket.onopen = () => {
-            socket.send("Ping");
+        this.socket.onopen = () => {
+            this.socket.send("Ping");
         };
-        socket.onmessage = (message) => {
-            console.log(`[TETRIS] ${message}`)
+        this.socket.onmessage = (message) => {
+            console.log(`[TETRIS] ${message}`);
         }
-        socket.onerror = (error) => console.log(error);
+        this.socket.onerror = (error) => console.log(error);
     }
 }

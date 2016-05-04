@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
     . "github.com/smartystreets/goconvey/convey"
@@ -20,13 +20,28 @@ func TestTetrisGame(t *testing.T) {
             dialer := websocket.Dialer{}
             conn, _, err := dialer.Dial("ws://localhost:8000/tetris", http.Header{})
             So(err, ShouldBeNil)
+            defer conn.Close()
             
-            messageType, message, messageErr := conn.ReadMessage()
-            So(messageErr, ShouldBeNil)
-            log.Printf("C1 <- S: (%d) %v", messageType, string(message))
+            go func() {
+                for i:=0; i<3; i++ {
+                    if messageType, message, messageErr := conn.ReadMessage(); messageErr == nil {
+                        log.Printf("C1 <- S: (%d) %v", messageType, string(message))
+                    } else {
+                        log.Printf("C1: Error reading message %v", messageErr)
+                    }
+                }
+            }()
 
-            messageErr = conn.WriteMessage(0, []byte("First response from client"))
+            conn2, _, err := dialer.Dial("ws://localhost:8000/tetris", http.Header{})
+            So(err, ShouldBeNil)
 
+            for i := 0; i < 3; i++ {
+                messageType, message, messageErr := conn2.ReadMessage()
+                So(messageErr, ShouldBeNil)
+                log.Printf("C2 <- S: (%d) %v", messageType, string(message))
+            }
         })
-    })}
+    })
+}
+
         
