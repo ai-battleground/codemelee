@@ -14,11 +14,11 @@ func TestTetrisBoard(t *testing.T) {
 		Convey("when time is advanced", func() {
 			Convey("and the piece is clear", func() {
 				board.Active.TetrisPiece = Pieces.O
-				board.Active.Position.y = 15
+				board.Active.Position.Y = 15
 				board.Advance()
 
 				Convey("the piece should descend", func() {
-					So(board.Active.Position.y, ShouldEqual, 14)
+					So(board.Active.Position.Y, ShouldEqual, 14)
 				})
 			})
 
@@ -71,11 +71,11 @@ func TestTetrisBoard(t *testing.T) {
 			board.Stage(Pieces.O)
 
 			Convey("the piece should be positioned at the top", func() {
-				So(board.Active.Position.y, ShouldEqual, board.height-board.Active.Height())
+				So(board.Active.Position.Y, ShouldEqual, board.height-board.Active.Height())
 			})
 
 			Convey("the piece should be centered", func() {
-				So(board.Active.Position.x, ShouldEqual, 4)
+				So(board.Active.Position.X, ShouldEqual, 4)
 			})
 		})
 

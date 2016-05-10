@@ -12,11 +12,11 @@ type TetrisPiece struct {
 func (piece TetrisPiece) Height() int {
 	var low, high int
 	for _, point := range piece.Orientations[0] {
-		if point.y < low {
-			low = point.y
+		if point.Y < low {
+			low = point.Y
 		}
-		if point.y > high {
-			high = point.y
+		if point.Y > high {
+			high = point.Y
 		}
 	}
 	return high - low + 1
@@ -29,11 +29,11 @@ type ActivePiece struct {
 }
 
 type Point struct {
-	x, y int
+	X, Y int
 }
 
 func (point Point) String() string {
-	return fmt.Sprintf("(%d, %d)", point.x, point.y)
+	return fmt.Sprintf("(%d, %d)", point.X, point.Y)
 }
 
 type Space struct {

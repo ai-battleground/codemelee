@@ -13,10 +13,10 @@ func (b *Board) Rotate() {
 	targetPosition := b.Active.Position
 
 	for b.anyPointsCollide(targetPosition, b.Active.Orientations[targetOrientation]) &&
-		targetPosition.x >= 0 {
-		targetPosition.x--
+		targetPosition.X >= 0 {
+		targetPosition.X--
 	}
-	if targetPosition.x >= 0 {
+	if targetPosition.X >= 0 {
 		b.Active.Orientation = targetOrientation
 		b.Active.Position = targetPosition
 	}

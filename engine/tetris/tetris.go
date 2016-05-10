@@ -20,6 +20,7 @@ type TetrisGame struct {
 	*Board
 	ShelfUpdated chan [4]TetrisPiece
 	ScoreChange  chan int
+	PieceState   chan ActivePiece
 }
 
 func NewTetrisGame() *TetrisGame {
@@ -28,7 +29,8 @@ func NewTetrisGame() *TetrisGame {
 		Level:        Levels[0],
 		Board:        NewTetrisBoard(),
 		ShelfUpdated: make(chan [4]TetrisPiece),
-		ScoreChange:  make(chan int)}
+		ScoreChange:  make(chan int),
+		PieceState:   make(chan ActivePiece)}
 	go g.handleAnchored()
 	go g.handleCollisions()
 	go g.handleClearedLines()
@@ -90,6 +92,7 @@ func (s *shelf) next() TetrisPiece {
 func (g *TetrisGame) advance() {
 	if g.state == Running {
 		advanceBoard(g.Board)
+		go func() { g.PieceState <- *g.Active }()
 		time.AfterFunc(time.Second / time.Duration(g.Level.speed), g.advance)
 	}
 }
@@ -119,6 +122,5 @@ func (g *TetrisGame) handleClearedLines() {
 func (g *TetrisGame) advancePiece() {
 	g.Stage(g.shelf.next())
 	g.shelf.push(g.Level.NextPiece())
-
 	go func() { g.ShelfUpdated <- g.Shelf() }()
 }

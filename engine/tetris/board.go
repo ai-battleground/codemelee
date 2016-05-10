@@ -86,7 +86,7 @@ func (b Board) wouldCollide(vector Point) bool {
 func (b Board) anyPointsCollide(position Point, points [4]Point) bool {
 	for _, p := range points {
 		testPoint := translate(position, p)
-		if testPoint.y < 0 || testPoint.x < 0 || testPoint.x >= 10 {
+		if testPoint.Y < 0 || testPoint.X < 0 || testPoint.X >= 10 {
 			return true
 		}
 		if !b.space(testPoint).empty {
@@ -97,7 +97,7 @@ func (b Board) anyPointsCollide(position Point, points [4]Point) bool {
 }
 
 func (b *Board) space(point Point) *Space {
-	return &b.plane[point.y][point.x]
+	return &b.plane[point.Y][point.X]
 }
 
 func (b *Board) clearLine(y int) {
@@ -112,7 +112,7 @@ func (b *Board) clearLine(y int) {
 }
 
 func translate(origin Point, vector Point) Point {
-	return Point{origin.x + vector.x, origin.y + vector.y}
+	return Point{origin.X + vector.X, origin.Y + vector.Y}
 }
 
 func isComplete(row []Space) bool {

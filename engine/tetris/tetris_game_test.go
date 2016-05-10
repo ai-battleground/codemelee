@@ -52,7 +52,7 @@ func TestTetrisGame(t *testing.T) {
 
 				Convey("should position the piece at the top", func() {
 					game.Start()
-					So(board.Active.Position.y, ShouldEqual, board.height-board.Active.Height())
+					So(board.Active.Position.Y, ShouldEqual, board.height-board.Active.Height())
 				})
 
 				Convey("should advance the board according to the level's speed", func() {
@@ -96,7 +96,7 @@ func TestTetrisGame(t *testing.T) {
 				select {
 				case _ = <-game.ShelfUpdated:
 					So(game.Board.Active.Name, ShouldEqual, "A")
-					So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+					So(game.Board.Active.Position.Y, ShouldEqual, game.Board.height-game.Board.Active.Height())
 				case <-time.After(time.Second * 1):
 					So(nil, ShouldNotBeNil)
 				}
@@ -128,7 +128,7 @@ func TestTetrisGame(t *testing.T) {
 						So(nil, ShouldNotBeNil)
 					}
 					So(game.Board.Active.Name, ShouldEqual, "B")
-					So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+					So(game.Board.Active.Position.Y, ShouldEqual, game.Board.height-game.Board.Active.Height())
 				})
 
 				Convey("the shelf should load another piece from the level", func() {
@@ -160,7 +160,7 @@ func TestTetrisGame(t *testing.T) {
 					So(nil, ShouldNotBeNil)
 				}
 				So(game.Board.Active.Name, ShouldEqual, "A")
-				So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+				So(game.Board.Active.Position.Y, ShouldEqual, game.Board.height-game.Board.Active.Height())
 			})
 
 			Convey("the shelf should load another piece from the level", func() {
@@ -189,7 +189,7 @@ func TestTetrisGame(t *testing.T) {
 						So(nil, ShouldNotBeNil)
 					}
 					So(game.Board.Active.Name, ShouldEqual, "B")
-					So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+					So(game.Board.Active.Position.Y, ShouldEqual, game.Board.height-game.Board.Active.Height())
 				})
 
 				Convey("the shelf should load another piece from the level", func() {

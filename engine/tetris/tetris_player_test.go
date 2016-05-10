@@ -17,13 +17,13 @@ func TestTetrisPlayer(t *testing.T) {
 			Convey("the piece should move to the right", func() {
 				board.Active.Position = Point{3, 10}
 				board.MoveRight()
-				So(board.Active.Position.x, ShouldEqual, 4)
+				So(board.Active.Position.X, ShouldEqual, 4)
 			})
 
 			Convey("and the piece is against the wall, the piece should not move", func() {
 				board.Active.Position = Point{9, 10} // box width is 2
 				board.MoveRight()
-				So(board.Active.Position.x, ShouldEqual, 9)
+				So(board.Active.Position.X, ShouldEqual, 9)
 			})
 
 			Convey("with wider piece against the wall, the piece should not move", func() {
@@ -32,14 +32,14 @@ func TestTetrisPlayer(t *testing.T) {
 					[4]Point{Point{0, 0}, Point{1, 0}, Point{2, 0}, Point{3, 0}})
 				board.Active.Position = Point{7, 10}
 				board.MoveRight()
-				So(board.Active.Position.x, ShouldEqual, 7)
+				So(board.Active.Position.X, ShouldEqual, 7)
 			})
 
 			Convey("and the piece is adjacent to a filled space, the piece should not move", func() {
 				board.Active.Position = Point{0, 10}
 				board.plane[11] = row("  **      ")
 				board.MoveRight()
-				So(board.Active.Position.x, ShouldEqual, 0)
+				So(board.Active.Position.X, ShouldEqual, 0)
 			})
 		})
 
@@ -49,20 +49,20 @@ func TestTetrisPlayer(t *testing.T) {
 			Convey("the piece should move to the left", func() {
 				board.Active.Position = Point{8, 10}
 				board.MoveLeft()
-				So(board.Active.Position.x, ShouldEqual, 7)
+				So(board.Active.Position.X, ShouldEqual, 7)
 			})
 
 			Convey("and the piece is against the wall, the piece should not move", func() {
 				board.Active.Position = Point{0, 10}
 				board.MoveLeft()
-				So(board.Active.Position.x, ShouldEqual, 0)
+				So(board.Active.Position.X, ShouldEqual, 0)
 			})
 
 			Convey("and the piece is adjacent to a filled space, the piece should not move", func() {
 				board.Active.Position = Point{4, 10}
 				board.plane[11] = row("  **      ")
 				board.MoveLeft()
-				So(board.Active.Position.x, ShouldEqual, 4)
+				So(board.Active.Position.X, ShouldEqual, 4)
 			})
 		})
 
@@ -95,7 +95,7 @@ func TestTetrisPlayer(t *testing.T) {
 					Convey("the piece should rotate, and move left", func() {
 						So(board.Active.Points(), ShouldResemble,
 							[4]Point{Point{0, 0}, Point{1, 0}, Point{2, 0}, Point{3, 0}})
-						So(board.Active.Position.x, ShouldEqual, 6)
+						So(board.Active.Position.X, ShouldEqual, 6)
 					})
 				})
 
@@ -113,7 +113,7 @@ func TestTetrisPlayer(t *testing.T) {
 					})
 
 					Convey("the piece should not move", func() {
-						So(board.Active.Position.x, ShouldEqual, 1)
+						So(board.Active.Position.X, ShouldEqual, 1)
 					})
 				})
 			})
