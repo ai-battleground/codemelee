@@ -8,7 +8,7 @@ export class GameConnection {
             this.socket.send("Ping");
         };
         this.socket.onmessage = (message) => {
-            console.log(`[TETRIS] ${message}`);
+            console.log(`[TETRIS] ${message.data}`);
         }
         this.socket.onerror = (error) => console.log(error);
     }

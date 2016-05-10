@@ -3,9 +3,11 @@ package main
 import (
     "net/http"
     "github.com/gorilla/websocket"
+    "encoding/json"
     "log"
     "fmt"
     "time"
+    "../../engine/tetris"
 )
 
 type TetrisGameServer struct {
@@ -15,7 +17,7 @@ type TetrisGameServer struct {
 func (s *TetrisGameServer) Stop() {
 
 }
-
+    
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -31,6 +33,28 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
     if (err != nil) {
         log.Println("Error setting up websocket: %v", err)
     }
+    game := tetris.NewTetrisGame()
+    game.Start()
+    log.Printf("Game started")
+    go func() {
+        for {
+            piece := <-game.PieceState
+            ps := struct {
+                Piece string
+                Position tetris.Point
+                Shape [4]tetris.Point
+            }{piece.Name, piece.Position, piece.Points()}
+            psJson, err := json.Marshal(ps)
+            if err != nil {
+                log.Printf("Error making json: %v", err)
+            } else {
+                if err = conn.WriteMessage(websocket.TextMessage, psJson); err != nil {
+                    log.Printf("Error sending piece state: %v", err)
+                }
+            }
+        }
+    }()
+
     go func() {
         if err = conn.WriteMessage(websocket.TextMessage, []byte("Hello, who's there?")); err != nil {
             log.Printf("Error sending hello: %v", err)
