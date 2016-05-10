@@ -41,21 +41,38 @@ func TestTetrisGame(t *testing.T) {
 		})
 
 		Convey("when the game is started", func() {
-			game.Start()
-
+			
 			Convey("the board", func() {
 				board := game.Board
 
 				Convey("should have an active piece", func() {
+					game.Start()
 					So(board.Active.TetrisPiece, ShouldResemble, Pieces.O)
 				})
 
 				Convey("should position the piece at the top", func() {
+					game.Start()
 					So(board.Active.Position.y, ShouldEqual, board.height-board.Active.Height())
+				})
+
+				Convey("should advance the board according to the level's speed", func() {
+					a := 0
+					originalFunc := advanceBoard
+					advanceBoard = func(board *Board) {
+						a++
+						originalFunc(board)
+					}
+					defer func() { advanceBoard = originalFunc }()
+					game.Level.speed = 12
+					game.Start()
+					time.Sleep(time.Second / 3)
+
+					So(a, ShouldEqual, 4)
 				})
 			})
 
 			Convey("the shelf", func() {
+				game.Start()
 				shelf := game.Shelf()
 
 				Convey("should load 4 O pieces", func() {
@@ -67,19 +84,22 @@ func TestTetrisGame(t *testing.T) {
 		})
 
 		Convey("when a piece is anchored", func() {
-			game.Start()
-
 			game.shelf.pieces = makeShelf("A", "B", "C", "D")
 
-			game.Level = Level{0, 0, func() TetrisPiece {
+			game.Level = Level{0, 1, func() TetrisPiece {
 				return TetrisPiece{Name: "X", Orientations: Pieces.O.Orientations}
 			}, func(int) int { return 0 }}
 
 			game.Board.Anchored <- Pieces.I
 
 			Convey("a new piece should be staged from the shelf", func() {
-				So(game.Board.Active.Name, ShouldEqual, "A")
-				So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+				select {
+				case _ = <-game.ShelfUpdated:
+					So(game.Board.Active.Name, ShouldEqual, "A")
+					So(game.Board.Active.Position.y, ShouldEqual, game.Board.height-game.Board.Active.Height())
+				case <-time.After(time.Second * 1):
+					So(nil, ShouldNotBeNil)
+				}
 			})
 
 			Convey("the shelf should load another piece from the level", func() {
@@ -125,11 +145,9 @@ func TestTetrisGame(t *testing.T) {
 		})
 
 		Convey("when a piece collides", func() {
-			game.Start()
-
 			game.shelf.pieces = makeShelf("A", "B", "C", "D")
 
-			game.Level = Level{0, 0, func() TetrisPiece {
+			game.Level = Level{0, 1, func() TetrisPiece {
 				return TetrisPiece{Name: "X", Orientations: Pieces.O.Orientations}
 			}, func(int) int { return 0 }}
 
@@ -191,7 +209,7 @@ func TestTetrisGame(t *testing.T) {
 
 			Convey("should load 4 pieces from the Level when the game starts", func() {
 				piece := 0
-				game.Level = Level{0, 0, func() TetrisPiece {
+				game.Level = Level{0, 1, func() TetrisPiece {
 					defer func() { piece++ }()
 					return TetrisPiece{Name: fmt.Sprintf("Piece %d", piece), Orientations: Pieces.O.Orientations}
 				}, func(int) int { return 0 }}
@@ -209,7 +227,7 @@ func TestTetrisGame(t *testing.T) {
 			game.Start()
 
 			Convey("the score increases according to the level", func() {
-				game.Level = Level{0, 0, func() TetrisPiece { return Pieces.O }, func(lines int) int {
+				game.Level = Level{0, 1, func() TetrisPiece { return Pieces.O }, func(lines int) int {
 					return lines * lines // just so we get a different number for different input
 				}}
 				Convey("for one line", func() {

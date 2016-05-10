@@ -1,7 +1,20 @@
 package tetris
 
+import (
+	"time"
+)
+
+type GameState int
+const (
+	PreStart GameState = iota
+	Running
+	Paused
+	GameOver
+)
+
 type TetrisGame struct {
 	score int
+	state GameState
 	shelf
 	Level
 	*Board
@@ -10,16 +23,22 @@ type TetrisGame struct {
 }
 
 func NewTetrisGame() *TetrisGame {
-	return &TetrisGame{
+	g := &TetrisGame{
 		score:        0,
 		Level:        Levels[0],
 		Board:        NewTetrisBoard(),
 		ShelfUpdated: make(chan [4]TetrisPiece),
 		ScoreChange:  make(chan int)}
+	go g.handleAnchored()
+	go g.handleCollisions()
+	go g.handleClearedLines()
+
+	return g
 }
 
 type Level struct {
-	number, speed int
+	number 		  int
+	speed 		  int64
 	NextPiece     func() TetrisPiece
 	Score         func(lines int) int
 }
@@ -29,15 +48,26 @@ type shelf struct {
 	head   int
 }
 
+var advanceBoard = func(board *Board) {
+	board.Advance()
+}
+
 func (g *TetrisGame) Start() {
-	first := g.NextPiece()
-	for i := 0; i < 4; i++ {
-		g.shelf.push(g.NextPiece())
+	if g.state == PreStart {
+		first := g.NextPiece()
+		for i := 0; i < 4; i++ {
+			g.shelf.push(g.NextPiece())
+		}
+		g.Stage(first)
 	}
-	g.Stage(first)
-	go g.handleAnchored()
-	go g.handleCollisions()
-	go g.handleClearedLines()
+	if g.state != Running {
+		go g.advance()
+	}
+	g.state = Running
+}
+
+func (g *TetrisGame) Pause() {
+	g.state = Paused
 }
 
 func (s *shelf) Shelf() [4]TetrisPiece {
@@ -55,6 +85,13 @@ func (s *shelf) push(p TetrisPiece) {
 
 func (s *shelf) next() TetrisPiece {
 	return s.pieces[s.head]
+}
+
+func (g *TetrisGame) advance() {
+	if g.state == Running {
+		advanceBoard(g.Board)
+		time.AfterFunc(time.Second / time.Duration(g.Level.speed), g.advance)
+	}
 }
 
 func (g *TetrisGame) handleAnchored() {
