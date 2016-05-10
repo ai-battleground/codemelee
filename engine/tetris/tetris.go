@@ -60,7 +60,7 @@ func (g *TetrisGame) Start() {
 		}
 		g.Stage(first)
 	}
-	if g.state != Running {
+	if g.state == Paused || g.state == PreStart {
 		go g.advance()
 	}
 	g.state = Running
