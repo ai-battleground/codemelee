@@ -7,7 +7,7 @@ import (
     "log"
     "fmt"
     "time"
-    "../../engine/tetris"
+    "github.com/rhoegg/codemelee/engine/tetris"
 )
 
 type TetrisGameServer struct {
