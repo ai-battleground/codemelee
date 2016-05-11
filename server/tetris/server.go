@@ -6,7 +6,6 @@ import (
     "encoding/json"
     "log"
     "fmt"
-    "time"
     "github.com/rhoegg/codemelee/engine/tetris"
 )
 
@@ -55,19 +54,6 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
         }
     }()
 
-    go func() {
-        if err = conn.WriteMessage(websocket.TextMessage, []byte("Hello, who's there?")); err != nil {
-            log.Printf("Error sending hello: %v", err)
-        }
-        time.Sleep(500 * time.Millisecond)
-        if err = conn.WriteMessage(websocket.TextMessage, []byte("Would you like to play a game?")); err != nil {
-            log.Printf("Error sending GTW proposition: %v", err)
-        }
-        time.Sleep(3000 * time.Millisecond)
-        if err = conn.WriteMessage(websocket.TextMessage, []byte("How about a nice game of chess?")); err != nil {
-            log.Printf("Error sending chess proposition: %v", err)
-        }
-    }()
 }
 
 func (s *TetrisGameServer) Listen() {
