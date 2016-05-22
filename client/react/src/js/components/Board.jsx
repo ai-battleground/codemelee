@@ -1,6 +1,7 @@
 import React from 'react';
 import Piece from './Piece';
 import { Point } from '../graphics'
+import { Layer, Rect, Stage } from 'react-konva'
 
 const KEY = {
   LEFT:  37,
@@ -15,8 +16,8 @@ const KEY = {
 };
 
 export default class Board extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
           screen: {
             width: 180,
@@ -34,43 +35,32 @@ export default class Board extends React.Component {
             x: 10,
             y: 20
           },
+          piece: {
+            position: new Point(1, 0)
+          },
           running: false,
           context: null,
           lastAnimated: 0
         };
+        this.animate = this.animate.bind(this);
+        this.tick = this.tick.bind(this);
+        this.update = this.update.bind(this);
+        this.start = this.start.bind(this);
     }
 
     componentDidMount() {
         window.addEventListener('keyup',   this.handleKeys.bind(this, false));
         window.addEventListener('keydown', this.handleKeys.bind(this, true));
 
-        const context = this.refs.canvas.getContext('2d');
-        this.setState({ context: context });
         this.start();
         requestAnimationFrame(() => this.update());
     }
 
     start() {
         this.state.running = true;
-        this.state.piece = new Piece({
-            position: new Point(1, 0),
-            tetromino: Piece.I,
-            projection: this.projection.bind(this)
-        });
     }
 
     update() {
-        const context = this.state.context;
-        context.save();
-
-        this.projection(context);
-        this.drawBoard(context, this.state.screen.width, this.state.screen.height);
-
-        context.restore();
-
-        // Render Piece
-        this.state.piece.render(this.state)
-
         this.animate(new Date().getTime());
         // Next frame
         requestAnimationFrame(() => this.update());
@@ -78,12 +68,8 @@ export default class Board extends React.Component {
 
     tick() {
         if (this.state.running) {
-            this.state.piece.position.y += 1;
+          this.setState({piece: {position: {x: 2, y: this.state.piece.position.y + 1}}})
         }
-    }
-
-    projection(context) {
-        context.translate(this.state.position.x, this.state.position.y);
     }
 
     animate(timestamp) {
@@ -92,13 +78,6 @@ export default class Board extends React.Component {
             this.state.lastAnimated = timestamp;
         }
     }
-
-    drawBoard(context, width, height) {
-        // background
-        context.fillStyle = "#000";
-        context.fillRect(0, 0, width, height);
-    }
-
 
     handleKeys(value, e){
       let keys = this.state.keys;
@@ -113,14 +92,18 @@ export default class Board extends React.Component {
     }
 
     render() {
-        return (
-            <div className="board">
-                <canvas ref="canvas"
-                  width={this.state.screen.width * this.state.screen.ratio}
-                  height={this.state.screen.height * this.state.screen.ratio}
-                />
-            </div>
-        );
+      return (
+          <div className="board">
+            <Stage width={480} height={480}>
+              <Layer x={10} y={20}>
+                <Rect
+                  x={0} y={0} width={180} height={360} fill={'black'} />
+                <Piece position={this.state.piece.position}
+                     tetromino={Piece.I} cellSize={18} />
+              </Layer>
+            </Stage>
+          </div>
+      )
     }
 }
 

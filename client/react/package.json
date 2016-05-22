@@ -26,5 +26,9 @@
     "react-dom": "^15.0.1",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"
+  },
+  "dependencies": {
+    "konva": "^0.13.0",
+    "react-konva": "^0.6.7"
   }
 }
