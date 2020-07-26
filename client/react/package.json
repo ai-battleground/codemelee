@@ -24,11 +24,14 @@
     "gulp-sourcemaps": "^1.6.0",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
+    "redux-devtools": "^3.3.1",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"
   },
   "dependencies": {
     "konva": "^0.13.0",
-    "react-konva": "^0.6.7"
+    "react-konva": "^0.6.7",
+    "react-redux": "^4.4.5",
+    "redux": "^3.5.2"
   }
 }

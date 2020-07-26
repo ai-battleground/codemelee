@@ -51,13 +51,17 @@ export default class Board extends React.Component {
     componentDidMount() {
         window.addEventListener('keyup',   this.handleKeys.bind(this, false));
         window.addEventListener('keydown', this.handleKeys.bind(this, true));
-
+        GameDispatcher.register();
         this.start();
         requestAnimationFrame(() => this.update());
     }
 
     start() {
         this.state.running = true;
+    }
+
+    onEvent(event) {
+      // put it into the state
     }
 
     update() {

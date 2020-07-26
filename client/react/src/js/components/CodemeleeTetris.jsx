@@ -1,19 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 
 import Board from './Board';
-import { GameConnection } from '../connection'
+import { GameConnection } from '../connection';
+
 
 export default class App extends React.Component {
     constructor() {
         super();
         this.state = {
-            name: ""
-        }
+            name: ''
+        };
     }
 
     componentDidMount() {
-        this.connection = new GameConnection("ws://localhost:54545/tetris");
+        this.connection = new GameConnection('ws://localhost:54545/tetris');
         this.connection.connect();
     }
 
