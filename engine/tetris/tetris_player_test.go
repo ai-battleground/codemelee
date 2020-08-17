@@ -70,7 +70,7 @@ func TestTetrisPlayer(t *testing.T) {
 			Convey("an I piece", func() {
 				board.Active.TetrisPiece = Pieces.I
 				Convey("once", func() {
-					board.Rotate()
+					board.RotateRight()
 
 					Convey("the piece should be horizontal", func() {
 						So(board.Active.Points(), ShouldResemble,
@@ -79,8 +79,8 @@ func TestTetrisPlayer(t *testing.T) {
 				})
 
 				Convey("twice", func() {
-					board.Rotate()
-					board.Rotate()
+					board.RotateRight()
+					board.RotateRight()
 
 					Convey("the piece should be vertical", func() {
 						So(board.Active.Points(), ShouldResemble,
@@ -90,7 +90,7 @@ func TestTetrisPlayer(t *testing.T) {
 
 				Convey("once, too close to the right wall", func() {
 					board.Active.Position = Point{9, 10}
-					board.Rotate()
+					board.RotateRight()
 
 					Convey("the piece should rotate, and move left", func() {
 						So(board.Active.Points(), ShouldResemble,
@@ -106,7 +106,7 @@ func TestTetrisPlayer(t *testing.T) {
 					board.plane[9] = row("*  **     ")
 					board.plane[8] = row("*****     ")
 					// and so on
-					board.Rotate()
+					board.RotateRight()
 
 					Convey("the piece should not rotate", func() {
 						So(board.Active.Orientation, ShouldEqual, 0)
@@ -122,7 +122,7 @@ func TestTetrisPlayer(t *testing.T) {
 				board.Active.TetrisPiece = Pieces.O
 
 				Convey("once", func() {
-					board.Rotate()
+					board.RotateRight()
 
 					Convey("the piece should be the same", func() {
 						So(board.Active.Points(), ShouldResemble,
@@ -131,8 +131,8 @@ func TestTetrisPlayer(t *testing.T) {
 				})
 
 				Convey("twice", func() {
-					board.Rotate()
-					board.Rotate()
+					board.RotateRight()
+					board.RotateRight()
 
 					Convey("the piece should be the same", func() {
 						So(board.Active.Points(), ShouldResemble,
@@ -143,45 +143,57 @@ func TestTetrisPlayer(t *testing.T) {
 
 			Convey("a T piece", func() {
 				board.Active.TetrisPiece = Pieces.T
+				Convey("to the right", func() {
+					Convey("once", func() {
+						board.RotateRight()
 
-				Convey("once", func() {
-					board.Rotate()
+						Convey("the piece should point right", func() {
+							So(board.Active.Points(), ShouldResemble,
+								[4]Point{Point{0, 0}, Point{0, 1}, Point{0, 2}, Point{1, 1}})
+						})
+					})
 
-					Convey("the piece should point right", func() {
-						So(board.Active.Points(), ShouldResemble,
-							[4]Point{Point{0, 0}, Point{0, 1}, Point{0, 2}, Point{1, 1}})
+					Convey("twice", func() {
+						board.RotateRight()
+						board.RotateRight()
+
+						Convey("the piece should point down", func() {
+							So(board.Active.Points(), ShouldResemble,
+								[4]Point{Point{0, 1}, Point{1, 0}, Point{1, 1}, Point{2, 1}})
+						})
+					})
+
+					Convey("three times", func() {
+						for i := 0; i < 3; i++ {
+							board.RotateRight()
+						}
+
+						Convey("the piece should point left", func() {
+							So(board.Active.Points(), ShouldResemble,
+								[4]Point{Point{0, 1}, Point{1, 0}, Point{1, 1}, Point{1, 2}})
+						})
+					})
+
+					Convey("four times", func() {
+						for i := 0; i < 4; i++ {
+							board.RotateRight()
+						}
+
+						Convey("the piece should point up", func() {
+							So(board.Active.Points(), ShouldResemble,
+								[4]Point{Point{0, 0}, Point{1, 0}, Point{1, 1}, Point{2, 0}})
+						})
 					})
 				})
 
-				Convey("twice", func() {
-					board.Rotate()
-					board.Rotate()
+				Convey("to the left", func() {
+					Convey("once", func() {
+						board.RotateLeft()
 
-					Convey("the piece should point down", func() {
-						So(board.Active.Points(), ShouldResemble,
-							[4]Point{Point{0, 1}, Point{1, 0}, Point{1, 1}, Point{2, 1}})
-					})
-				})
-
-				Convey("three times", func() {
-					for i := 0; i < 3; i++ {
-						board.Rotate()
-					}
-
-					Convey("the piece should point left", func() {
-						So(board.Active.Points(), ShouldResemble,
-							[4]Point{Point{0, 1}, Point{1, 0}, Point{1, 1}, Point{1, 2}})
-					})
-				})
-
-				Convey("four times", func() {
-					for i := 0; i < 4; i++ {
-						board.Rotate()
-					}
-
-					Convey("the piece should point up", func() {
-						So(board.Active.Points(), ShouldResemble,
-							[4]Point{Point{0, 0}, Point{1, 0}, Point{1, 1}, Point{2, 0}})
+						Convey("the piece should point left", func() {
+							So(board.Active.Points(), ShouldResemble,
+								[4]Point{Point{0, 1}, Point{1, 0}, Point{1, 1}, Point{1, 2}})
+						})
 					})
 				})
 			})
