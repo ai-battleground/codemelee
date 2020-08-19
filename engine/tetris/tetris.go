@@ -88,8 +88,12 @@ func (g *TetrisGame) Pause() {
 	g.state = Paused
 }
 
-func (g TetrisGame) CurrentScore() int {
+func (g TetrisGame) Score() int {
 	return g.score
+}
+
+func (g TetrisGame) State() GameState {
+	return g.state
 }
 
 func (s *shelf) Shelf() [4]TetrisPiece {
