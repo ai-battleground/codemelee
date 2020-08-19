@@ -1,5 +1,7 @@
 package tetris
 
+import "strings"
+
 type Board struct {
 	width, height int
 	plane         [][]Space
@@ -41,6 +43,19 @@ func (b *Board) Stage(piece TetrisPiece) {
 			}
 		}
 	}
+}
+
+func (b *Board) TakeSnapshot() string {
+	var snapshotLines []string
+	for i, _ := range b.plane {
+		row := b.plane[len(b.plane)-1-i]
+		var line []byte
+		for _, space := range row {
+			line = append(line, space.contents)
+		}
+		snapshotLines = append(snapshotLines, string(line))
+	}
+	return strings.Join(snapshotLines, "\n")
 }
 
 func (b *Board) anchor() {

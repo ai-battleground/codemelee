@@ -1,7 +1,9 @@
 package tetris
 
 import (
+	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
+	"strings"
 	"testing"
 	"time"
 )
@@ -172,6 +174,36 @@ func TestTetrisBoard(t *testing.T) {
 					So(board.plane[i], ShouldResemble, row("          "))
 				}
 			})
+		})
+
+		Convey("when a snapshot is taken", func() {
+			board.plane[3] = row("LLL       ")
+			board.plane[2] = row("L         ")
+			board.plane[1] = row("OO   T    ")
+			board.plane[0] = row("OO  TTT   ")
+
+			Convey("it should have the same height as the board", func() {
+				snapshot := board.TakeSnapshot()
+				snapshotLines := strings.Split(snapshot, "\n")
+				So(len(snapshotLines), ShouldEqual, board.height)
+				for lineNum, line := range snapshotLines {
+					Convey(fmt.Sprintf("Line %d should have the same width as the board", lineNum), func() {
+						So(len(line), ShouldEqual, board.width)
+					})
+				}
+			})
+
+			Convey("it should reflect the board state", func() {
+				snapshot := board.TakeSnapshot()
+				snapshotLines := strings.Split(snapshot, "\n")
+				expectedLastFourLines := "LLL       \n" +
+					"L         \n" +
+					"OO   T    \n" +
+					"OO  TTT   "
+				snapshotLastFourLines := strings.Join(snapshotLines[16:], "\n")
+				So(snapshotLastFourLines, ShouldEqual, expectedLastFourLines)
+			})
+
 		})
 	})
 }
