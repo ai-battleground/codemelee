@@ -37,7 +37,7 @@ func (b *Board) Stage(piece TetrisPiece) {
 		go func() { b.Collision <- piece }()
 		for y := range b.plane {
 			for x := range b.plane[y] {
-				b.plane[y][x].empty = true
+				b.plane[y][x].contents = ' '
 			}
 		}
 	}
@@ -45,14 +45,14 @@ func (b *Board) Stage(piece TetrisPiece) {
 
 func (b *Board) anchor() {
 	for _, p := range b.Active.Points() {
-		b.space(translate(b.Active.Position, p)).empty = false
+		b.space(translate(b.Active.Position, p)).contents = b.Active.Name[0]
 	}
 	go func() { b.Anchored <- b.Active.TetrisPiece }()
 	b.clearLines()
 }
 
 func (b *Board) clearLines() {
-	completedLines := []int{}
+	var completedLines []int
 	for i, row := range b.plane {
 		if isComplete(row) {
 			completedLines = append(completedLines, i)
@@ -89,7 +89,7 @@ func (b Board) anyPointsCollide(position Point, points [4]Point) bool {
 		if testPoint.Y < 0 || testPoint.X < 0 || testPoint.X >= 10 {
 			return true
 		}
-		if !b.space(testPoint).empty {
+		if !b.space(testPoint).Empty() {
 			return true
 		}
 	}
@@ -103,11 +103,11 @@ func (b *Board) space(point Point) *Space {
 func (b *Board) clearLine(y int) {
 	for i := y; i < 19; i++ {
 		for j := range b.plane[i] {
-			b.plane[i][j].empty = b.plane[i+1][j].empty
+			b.plane[i][j].contents = b.plane[i+1][j].contents
 		}
 	}
 	for x := range b.plane[19] {
-		b.plane[19][x].empty = true
+		b.plane[19][x].contents = ' '
 	}
 }
 
@@ -117,7 +117,7 @@ func translate(origin Point, vector Point) Point {
 
 func isComplete(row []Space) bool {
 	for _, space := range row {
-		if space.empty {
+		if space.Empty() {
 			return false
 		}
 	}
@@ -135,7 +135,7 @@ func newPlane(width int, height int) [][]Space {
 func newRow(width int) []Space {
 	row := make([]Space, width)
 	for i := range row {
-		row[i] = Space{empty: true}
+		row[i] = Space{contents: ' '}
 	}
 	return row
 }

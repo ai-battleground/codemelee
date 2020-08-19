@@ -28,8 +28,8 @@ func TestTetrisBoard(t *testing.T) {
 				board.Advance()
 
 				Convey("the piece should be anchored to the board", func() {
-					So(board.plane[1], ShouldResemble, row("   **     "))
-					So(board.plane[0], ShouldResemble, row("   **     "))
+					So(board.plane[1], ShouldResemble, row("   OO     "))
+					So(board.plane[0], ShouldResemble, row("   OO     "))
 				})
 
 				Convey("the piece should be sent to the anchor channel", func() {
@@ -52,8 +52,8 @@ func TestTetrisBoard(t *testing.T) {
 				board.Advance()
 
 				Convey("the piece should be anchored to the board", func() {
-					So(board.plane[3], ShouldResemble, row("       ** "))
-					So(board.plane[2], ShouldResemble, row("       ** "))
+					So(board.plane[3], ShouldResemble, row("       OO "))
+					So(board.plane[2], ShouldResemble, row("       OO "))
 				})
 
 				Convey("the piece should be sent to the anchor channel", func() {
@@ -107,9 +107,9 @@ func TestTetrisBoard(t *testing.T) {
 					case <-time.After(time.Second * 1):
 					}
 					So(board.plane[5], ShouldResemble, row("          "))
-					So(board.plane[4], ShouldResemble, row("         *"))
-					So(board.plane[3], ShouldResemble, row("         *"))
-					So(board.plane[2], ShouldResemble, row("******** *"))
+					So(board.plane[4], ShouldResemble, row("         I"))
+					So(board.plane[3], ShouldResemble, row("         I"))
+					So(board.plane[2], ShouldResemble, row("******** I"))
 					So(board.plane[1], ShouldResemble, row("* ********"))
 					So(board.plane[0], ShouldResemble, row("* ********"))
 				})
@@ -144,7 +144,7 @@ func TestTetrisBoard(t *testing.T) {
 					So(board.plane[5], ShouldResemble, row("          "))
 					So(board.plane[4], ShouldResemble, row("          "))
 					So(board.plane[3], ShouldResemble, row("          "))
-					So(board.plane[2], ShouldResemble, row("         *"))
+					So(board.plane[2], ShouldResemble, row("         I"))
 					So(board.plane[1], ShouldResemble, row("* ********"))
 					So(board.plane[0], ShouldResemble, row("* ********"))
 				})
@@ -179,7 +179,7 @@ func TestTetrisBoard(t *testing.T) {
 func row(s string) []Space {
 	row := make([]Space, 10)
 	for i := 0; i < 10; i++ {
-		row[i] = Space{empty: s[i] == byte(' ')}
+		row[i] = Space{contents: s[i]}
 	}
 	return row
 }

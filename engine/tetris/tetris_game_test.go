@@ -34,14 +34,14 @@ func TestTetrisGame(t *testing.T) {
 			Convey("should be empty", func() {
 				for _, row := range board.plane {
 					for _, space := range row {
-						So(space.empty, ShouldBeTrue)
+						So(space.Empty(), ShouldBeTrue)
 					}
 				}
 			})
 		})
 
 		Convey("when the game is started", func() {
-			
+
 			Convey("the board", func() {
 				board := game.Board
 

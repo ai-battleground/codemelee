@@ -37,15 +37,15 @@ func (point Point) String() string {
 }
 
 type Space struct {
-	empty bool
+	contents byte
 }
 
 func (space Space) String() string {
-	if space.empty {
-		return " "
-	} else {
-		return "*"
-	}
+	return string(space.contents)
+}
+
+func (space Space) Empty() bool {
+	return space.contents == ' '
 }
 
 func (active ActivePiece) Points() [4]Point {

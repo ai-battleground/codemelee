@@ -211,8 +211,8 @@ func TestTetrisPlayer(t *testing.T) {
 				case <-time.After(time.Second * 1):
 					So(nil, ShouldNotBeNil)
 				}
-				So(board.plane[1], ShouldResemble, row("      **  "))
-				So(board.plane[0], ShouldResemble, row("      **  "))
+				So(board.plane[1], ShouldResemble, row("      OO  "))
+				So(board.plane[0], ShouldResemble, row("      OO  "))
 			})
 
 			Convey("with a filled space below, the piece should anchor directly above it", func() {
@@ -227,8 +227,8 @@ func TestTetrisPlayer(t *testing.T) {
 					So(nil, ShouldNotBeNil)
 				}
 
-				So(board.plane[3], ShouldResemble, row("      **  "))
-				So(board.plane[2], ShouldResemble, row("      **  "))
+				So(board.plane[3], ShouldResemble, row("      OO  "))
+				So(board.plane[2], ShouldResemble, row("      OO  "))
 				So(board.plane[1], ShouldResemble, row("    ***   "))
 				So(board.plane[0], ShouldResemble, row("    *     "))
 			})
