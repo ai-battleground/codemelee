@@ -5,12 +5,28 @@ import (
 )
 
 type GameState int
+
 const (
 	PreStart GameState = iota
 	Running
 	Paused
 	GameOver
 )
+
+func (gs GameState) String() string {
+	switch gs {
+	case PreStart:
+		return "Not Started"
+	case Running:
+		return "Running"
+	case Paused:
+		return "Paused"
+	case GameOver:
+		return "Game Over"
+	default:
+		return ""
+	}
+}
 
 type TetrisGame struct {
 	score int
@@ -39,10 +55,10 @@ func NewTetrisGame() *TetrisGame {
 }
 
 type Level struct {
-	number 		  int
-	speed 		  int64
-	NextPiece     func() TetrisPiece
-	Score         func(lines int) int
+	number    int
+	speed     int64
+	NextPiece func() TetrisPiece
+	Score     func(lines int) int
 }
 
 type shelf struct {
@@ -72,6 +88,10 @@ func (g *TetrisGame) Pause() {
 	g.state = Paused
 }
 
+func (g TetrisGame) CurrentScore() int {
+	return g.score
+}
+
 func (s *shelf) Shelf() [4]TetrisPiece {
 	return [4]TetrisPiece{
 		s.pieces[s.head],
@@ -93,7 +113,7 @@ func (g *TetrisGame) advance() {
 	if g.state == Running {
 		advanceBoard(g.Board)
 		go func() { g.PieceState <- *g.Active }()
-		time.AfterFunc(time.Second / time.Duration(g.Level.speed), g.advance)
+		time.AfterFunc(time.Second/time.Duration(g.Level.speed), g.advance)
 	}
 }
 
