@@ -204,6 +204,21 @@ func TestTetrisBoard(t *testing.T) {
 				So(snapshotLastFourLines, ShouldEqual, expectedLastFourLines)
 			})
 
+			Convey("it should reflect the active piece", func() {
+				board.Stage(Pieces.T)
+				board.Advance()
+				board.Advance()
+				board.RotateRight()
+
+				snapshot := board.TakeSnapshot()
+				snapshotLines := strings.Split(snapshot, "\n")
+
+				expectedPieceLines := "    T     \n" +
+					"    TT    \n" +
+					"    T     "
+				snapshotRelevantLines := strings.Join(snapshotLines[1:4], "\n")
+				So(snapshotRelevantLines, ShouldEqual, expectedPieceLines)
+			})
 		})
 	})
 }

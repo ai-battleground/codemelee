@@ -48,12 +48,20 @@ func (b *Board) Stage(piece TetrisPiece) {
 func (b *Board) TakeSnapshot() string {
 	var snapshotLines []string
 	for i, _ := range b.plane {
-		row := b.plane[len(b.plane)-1-i]
+		row := b.plane[b.height-1-i]
 		var line []byte
 		for _, space := range row {
 			line = append(line, space.contents)
 		}
 		snapshotLines = append(snapshotLines, string(line))
+	}
+	if len(b.Active.Name) > 0 {
+		for _, point := range b.Active.Points() {
+			boardPoint := translate(b.Active.Position, point)
+			line := []byte(snapshotLines[b.height-1-boardPoint.Y])
+			line[boardPoint.X] = byte(b.Active.Name[0])
+			snapshotLines[b.height-1-boardPoint.Y] = string(line)
+		}
 	}
 	return strings.Join(snapshotLines, "\n")
 }
