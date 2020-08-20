@@ -20,7 +20,7 @@ func TestTetrisGame(t *testing.T) {
 		})
 
 		Convey("the initial score should be 0", func() {
-			So(game.CurrentScore(), ShouldEqual, 0)
+			So(game.Score(), ShouldEqual, 0)
 		})
 
 		Convey("the board", func() {
