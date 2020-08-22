@@ -71,6 +71,9 @@ var advanceBoard = func(board *Board) {
 }
 
 func (g *TetrisGame) Start() {
+	if g.state == GameOver {
+		return
+	}
 	if g.state == PreStart {
 		first := g.NextPiece()
 		for i := 0; i < 4; i++ {
@@ -131,7 +134,7 @@ func (g *TetrisGame) handleAnchored() {
 func (g *TetrisGame) handleCollisions() {
 	for {
 		_ = <-g.Board.Collision
-		g.advancePiece()
+		g.state = GameOver
 	}
 }
 
