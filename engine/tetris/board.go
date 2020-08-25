@@ -1,25 +1,27 @@
 package tetris
 
-import "strings"
+import (
+	"strings"
+	"sync"
+)
 
 type Board struct {
-	width, height int
-	plane         [][]Space
-	Active        *ActivePiece
-	Anchored      chan TetrisPiece
-	Cleared       chan []int
-	Collision     chan TetrisPiece
+	width, height      int
+	plane              [][]Space
+	Active             *ActivePiece
+	Anchored           chan Piece
+	clearedObservers   []func([]int)
+	collisionObservers []func()
 }
 
-func NewTetrisBoard() *Board {
-	return &Board{
-		width:     10,
-		height:    20,
-		plane:     newPlane(10, 20),
-		Active:    &ActivePiece{},
-		Anchored:  make(chan TetrisPiece),
-		Collision: make(chan TetrisPiece),
-		Cleared:   make(chan []int)}
+func NewBoard() *Board {
+	b := &Board{
+		width:    10,
+		height:   20,
+		plane:    newPlane(10, 20),
+		Active:   &ActivePiece{},
+		Anchored: make(chan Piece)}
+	return b
 }
 
 func (b *Board) Advance() {
@@ -30,18 +32,22 @@ func (b *Board) Advance() {
 	}
 }
 
-func (b *Board) Stage(piece TetrisPiece) {
+func (b *Board) Stage(piece Piece) {
 	stagePosition := Point{4, b.height - piece.Height()}
 
 	b.Active = &ActivePiece{piece, stagePosition, 0}
 
 	if b.anyPointsCollide(stagePosition, piece.Orientations[0]) {
-		go func() { b.Collision <- piece }()
-		for y := range b.plane {
-			for x := range b.plane[y] {
-				b.plane[y][x].contents = ' '
-			}
+		var wg sync.WaitGroup
+		wg.Add(len(b.collisionObservers))
+		for _, o := range b.collisionObservers {
+			observer := o
+			go func() {
+				observer()
+				wg.Done()
+			}()
 		}
+		wg.Wait()
 	}
 }
 
@@ -66,11 +72,19 @@ func (b *Board) TakeSnapshot() string {
 	return strings.Join(snapshotLines, "\n")
 }
 
+func (b *Board) OnClearedLines(observer func([]int)) {
+	b.clearedObservers = append(b.clearedObservers, observer)
+}
+
+func (b *Board) OnCollision(observer func()) {
+	b.collisionObservers = append(b.collisionObservers, observer)
+}
+
 func (b *Board) anchor() {
 	for _, p := range b.Active.Points() {
 		b.space(translate(b.Active.Position, p)).contents = b.Active.Name[0]
 	}
-	go func() { b.Anchored <- b.Active.TetrisPiece }()
+	go func() { b.Anchored <- b.Active.Piece }()
 	b.clearLines()
 }
 
@@ -82,11 +96,20 @@ func (b *Board) clearLines() {
 		}
 	}
 	if len(completedLines) > 0 {
+		var wg sync.WaitGroup
+		wg.Add(len(b.clearedObservers))
+		for _, o := range b.clearedObservers {
+			observer := o
+			go func() {
+				observer(completedLines)
+				wg.Done()
+			}()
+		}
+		wg.Wait()
 		// iterate in reverse so that the row indices stay accurate
 		for i := len(completedLines) - 1; i >= 0; i-- {
 			b.clearLine(completedLines[i])
 		}
-		go func() { b.Cleared <- completedLines }()
 	}
 }
 
@@ -109,6 +132,9 @@ func (b Board) wouldCollide(vector Point) bool {
 func (b Board) anyPointsCollide(position Point, points [4]Point) bool {
 	for _, p := range points {
 		testPoint := translate(position, p)
+		if testPoint.Y > 19 {
+			return false
+		}
 		if testPoint.Y < 0 || testPoint.X < 0 || testPoint.X >= 10 {
 			return true
 		}

@@ -28,28 +28,25 @@ func (gs GameState) String() string {
 	}
 }
 
-type TetrisGame struct {
+type Game struct {
 	score int
 	state GameState
 	shelf
 	Level
 	*Board
-	ShelfUpdated chan [4]TetrisPiece
-	ScoreChange  chan int
+	ShelfUpdated chan [4]Piece
 	PieceState   chan ActivePiece
 }
 
-func NewTetrisGame() *TetrisGame {
-	g := &TetrisGame{
+func NewGame() *Game {
+	g := &Game{
 		score:        0,
 		Level:        Levels[0],
-		Board:        NewTetrisBoard(),
-		ShelfUpdated: make(chan [4]TetrisPiece),
-		ScoreChange:  make(chan int),
+		Board:        NewBoard(),
+		ShelfUpdated: make(chan [4]Piece),
 		PieceState:   make(chan ActivePiece)}
 	go g.handleAnchored()
-	go g.handleCollisions()
-	go g.handleClearedLines()
+	g.Board.OnClearedLines(g.handleClearedLines)
 
 	return g
 }
@@ -57,20 +54,16 @@ func NewTetrisGame() *TetrisGame {
 type Level struct {
 	number    int
 	speed     int64
-	NextPiece func() TetrisPiece
+	NextPiece func() Piece
 	Score     func(lines int) int
 }
 
 type shelf struct {
-	pieces [4]TetrisPiece
+	pieces [4]Piece
 	head   int
 }
 
-var advanceBoard = func(board *Board) {
-	board.Advance()
-}
-
-func (g *TetrisGame) Start() {
+func (g *Game) Start() {
 	if g.state == GameOver {
 		return
 	}
@@ -87,66 +80,55 @@ func (g *TetrisGame) Start() {
 	g.state = Running
 }
 
-func (g *TetrisGame) Pause() {
+func (g *Game) Pause() {
 	g.state = Paused
 }
 
-func (g TetrisGame) Score() int {
+func (g Game) Score() int {
 	return g.score
 }
 
-func (g TetrisGame) State() GameState {
+func (g Game) State() GameState {
 	return g.state
 }
 
-func (s *shelf) Shelf() [4]TetrisPiece {
-	return [4]TetrisPiece{
+func (s *shelf) Shelf() [4]Piece {
+	return [4]Piece{
 		s.pieces[s.head],
 		s.pieces[(s.head+1)%4],
 		s.pieces[(s.head+2)%4],
 		s.pieces[(s.head+3)%4]}
 }
 
-func (s *shelf) push(p TetrisPiece) {
+func (s *shelf) push(p Piece) {
 	s.pieces[s.head] = p
 	s.head = (s.head + 1) % 4
 }
 
-func (s *shelf) next() TetrisPiece {
+func (s *shelf) next() Piece {
 	return s.pieces[s.head]
 }
 
-func (g *TetrisGame) advance() {
+func (g *Game) advance() {
 	if g.state == Running {
-		advanceBoard(g.Board)
+		g.Board.Advance()
 		go func() { g.PieceState <- *g.Active }()
 		time.AfterFunc(time.Second/time.Duration(g.Level.speed), g.advance)
 	}
 }
 
-func (g *TetrisGame) handleAnchored() {
+func (g *Game) handleAnchored() {
 	for {
 		_ = <-g.Board.Anchored
 		g.advancePiece()
 	}
 }
 
-func (g *TetrisGame) handleCollisions() {
-	for {
-		_ = <-g.Board.Collision
-		g.state = GameOver
-	}
+func (g *Game) handleClearedLines(lines []int) {
+	g.score += g.Level.Score(len(lines))
 }
 
-func (g *TetrisGame) handleClearedLines() {
-	for {
-		lines := <-g.Board.Cleared
-		g.score += g.Level.Score(len(lines))
-		g.ScoreChange <- g.score
-	}
-}
-
-func (g *TetrisGame) advancePiece() {
+func (g *Game) advancePiece() {
 	g.Stage(g.shelf.next())
 	g.shelf.push(g.Level.NextPiece())
 	go func() { g.ShelfUpdated <- g.Shelf() }()

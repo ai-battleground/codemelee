@@ -2,6 +2,7 @@ package tetris
 
 import (
 	"fmt"
+	"github.com/smartystreets/assertions/should"
 	. "github.com/smartystreets/goconvey/convey"
 	"strings"
 	"testing"
@@ -11,11 +12,11 @@ import (
 func TestTetrisBoard(t *testing.T) {
 
 	Convey("Given a tetris board", t, func() {
-		board := NewTetrisBoard()
+		board := NewBoard()
 
 		Convey("when time is advanced", func() {
 			Convey("and the piece is clear", func() {
-				board.Active.TetrisPiece = Pieces.O
+				board.Active.Piece = Pieces.O
 				board.Active.Position.Y = 15
 				board.Advance()
 
@@ -25,7 +26,7 @@ func TestTetrisBoard(t *testing.T) {
 			})
 
 			Convey("and the piece is at the bottom", func() {
-				board.Active.TetrisPiece = Pieces.O
+				board.Active.Piece = Pieces.O
 				board.Active.Position = Point{3, 0}
 				board.Advance()
 
@@ -45,7 +46,7 @@ func TestTetrisBoard(t *testing.T) {
 			})
 
 			Convey("and the piece is directly above at least one filled space", func() {
-				board.Active.TetrisPiece = Pieces.O
+				board.Active.Piece = Pieces.O
 				board.Active.Position = Point{7, 2}
 				//                           xx
 				//                           xx
@@ -87,27 +88,22 @@ func TestTetrisBoard(t *testing.T) {
 			board.plane[1] = row("* ********")
 			board.plane[0] = row("* ********")
 
-			board.Active.TetrisPiece = Pieces.I
+			board.Active.Piece = Pieces.I
 			board.Active.Position = Point{9, 15}
 
 			Convey("a single line", func() {
+				var cleared []int
+				board.OnClearedLines(func(lines []int) {
+					cleared = lines
+				})
 				board.Drop()
 
-				Convey("the line should be sent to the cleared channel", func() {
-					select {
-					case clearedLines := <-board.Cleared:
-						So(len(clearedLines), ShouldEqual, 1)
-						So(clearedLines[0], ShouldEqual, 2)
-					case <-time.After(time.Second * 1):
-						So(nil, ShouldNotBeNil)
-					}
+				Convey("the line should be sent to observers", func() {
+					So(len(cleared), should.Equal, 1)
+					So(cleared[0], should.Equal, 2)
 				})
 
 				Convey("the line should be removed and higher lines dropped", func() {
-					select {
-					case _ = <-board.Cleared:
-					case <-time.After(time.Second * 1):
-					}
 					So(board.plane[5], ShouldResemble, row("          "))
 					So(board.plane[4], ShouldResemble, row("         I"))
 					So(board.plane[3], ShouldResemble, row("         I"))
@@ -124,25 +120,18 @@ func TestTetrisBoard(t *testing.T) {
 				// already there:     * ********
 				// already there:     * ********
 
+				var cleared []int
+				board.OnClearedLines(func(lines []int) {
+					cleared = lines
+				})
 				board.Drop()
 
-				Convey("the lines should be sent to the cleared channel", func() {
-					select {
-					case clearedLines := <-board.Cleared:
-						So(len(clearedLines), ShouldEqual, 3)
-						So(clearedLines[0], ShouldEqual, 2)
-						So(clearedLines[1], ShouldEqual, 3)
-						So(clearedLines[2], ShouldEqual, 4)
-					case <-time.After(time.Second * 1):
-						So(nil, ShouldNotBeNil)
-					}
+				Convey("the lines should be sent to observers", func() {
+					So(len(cleared), should.Equal, 3)
+					So(cleared, should.Resemble, []int{2, 3, 4})
 				})
 
 				Convey("the lines should be removed and higher lines dropped", func() {
-					select {
-					case _ = <-board.Cleared:
-					case <-time.After(time.Second * 1):
-					}
 					So(board.plane[5], ShouldResemble, row("          "))
 					So(board.plane[4], ShouldResemble, row("          "))
 					So(board.plane[3], ShouldResemble, row("          "))
@@ -154,25 +143,18 @@ func TestTetrisBoard(t *testing.T) {
 		})
 
 		Convey("when a piece is staged that would collide", func() {
+			collisionDetected := false
+			board.OnCollision(func() {
+				collisionDetected = true
+			})
 			for i := 0; i < 20; i++ {
 				board.plane[i] = row("    **    ")
 			}
 
 			board.Stage(Pieces.O)
 
-			Convey("the piece should be sent to the collision channel", func() {
-				select {
-				case collision := <-board.Collision:
-					So(collision, ShouldResemble, Pieces.O)
-				case <-time.After(time.Second * 1):
-					So(nil, ShouldNotBeNil)
-				}
-			})
-
-			Convey("the board is cleared", func() {
-				for i := 0; i < 20; i++ {
-					So(board.plane[i], ShouldResemble, row("          "))
-				}
+			Convey("a collision event should be published", func() {
+				So(collisionDetected, ShouldBeTrue)
 			})
 		})
 

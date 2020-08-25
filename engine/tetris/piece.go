@@ -4,12 +4,12 @@ import (
 	"fmt"
 )
 
-type TetrisPiece struct {
+type Piece struct {
 	Name         string
 	Orientations [][4]Point
 }
 
-func (piece TetrisPiece) Height() int {
+func (piece Piece) Height() int {
 	var low, high int
 	for _, point := range piece.Orientations[0] {
 		if point.Y < low {
@@ -23,7 +23,7 @@ func (piece TetrisPiece) Height() int {
 }
 
 type ActivePiece struct {
-	TetrisPiece
+	Piece
 	Position    Point
 	Orientation int
 }
@@ -53,17 +53,17 @@ func (active ActivePiece) Points() [4]Point {
 }
 
 var Pieces = struct {
-	O TetrisPiece
-	I TetrisPiece
-	T TetrisPiece
+	O Piece
+	I Piece
+	T Piece
 }{
-	TetrisPiece{
+	Piece{
 		Name:         "O",
 		Orientations: [][4]Point{}},
-	TetrisPiece{
+	Piece{
 		Name:         "I",
 		Orientations: [][4]Point{}},
-	TetrisPiece{
+	Piece{
 		Name:         "T",
 		Orientations: [][4]Point{}}}
 

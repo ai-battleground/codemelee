@@ -9,10 +9,10 @@ import (
 func TestTetrisPlayer(t *testing.T) {
 
 	Convey("Given a tetris board", t, func() {
-		board := NewTetrisBoard()
+		board := NewBoard()
 
 		Convey("when the player moves right", func() {
-			board.Active.TetrisPiece = Pieces.O
+			board.Active.Piece = Pieces.O
 
 			Convey("the piece should move to the right", func() {
 				board.Active.Position = Point{3, 10}
@@ -27,7 +27,7 @@ func TestTetrisPlayer(t *testing.T) {
 			})
 
 			Convey("with wider piece against the wall, the piece should not move", func() {
-				board.Active.TetrisPiece = TetrisPiece{Name: "TestPiece", Orientations: [][4]Point{}}
+				board.Active.Piece = Piece{Name: "TestPiece", Orientations: [][4]Point{}}
 				board.Active.Orientations = append(board.Active.Orientations,
 					[4]Point{Point{0, 0}, Point{1, 0}, Point{2, 0}, Point{3, 0}})
 				board.Active.Position = Point{7, 10}
@@ -44,7 +44,7 @@ func TestTetrisPlayer(t *testing.T) {
 		})
 
 		Convey("when the player moves left", func() {
-			board.Active.TetrisPiece = Pieces.O
+			board.Active.Piece = Pieces.O
 
 			Convey("the piece should move to the left", func() {
 				board.Active.Position = Point{8, 10}
@@ -68,7 +68,7 @@ func TestTetrisPlayer(t *testing.T) {
 
 		Convey("when the player rotates", func() {
 			Convey("an I piece", func() {
-				board.Active.TetrisPiece = Pieces.I
+				board.Active.Piece = Pieces.I
 				Convey("once", func() {
 					board.RotateRight()
 
@@ -119,7 +119,7 @@ func TestTetrisPlayer(t *testing.T) {
 			})
 
 			Convey("an O piece", func() {
-				board.Active.TetrisPiece = Pieces.O
+				board.Active.Piece = Pieces.O
 
 				Convey("once", func() {
 					board.RotateRight()
@@ -142,7 +142,7 @@ func TestTetrisPlayer(t *testing.T) {
 			})
 
 			Convey("a T piece", func() {
-				board.Active.TetrisPiece = Pieces.T
+				board.Active.Piece = Pieces.T
 				Convey("to the right", func() {
 					Convey("once", func() {
 						board.RotateRight()
@@ -200,7 +200,7 @@ func TestTetrisPlayer(t *testing.T) {
 		})
 
 		Convey("when the player drops the piece", func() {
-			board.Active.TetrisPiece = Pieces.O
+			board.Active.Piece = Pieces.O
 			board.Active.Position = Point{6, 17}
 
 			Convey("with no filled spaces below, the piece should anchor to the floor", func() {
