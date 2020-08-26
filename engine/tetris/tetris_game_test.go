@@ -2,6 +2,7 @@ package tetris
 
 import (
 	"fmt"
+	"github.com/smartystreets/assertions/should"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 	"time"
@@ -58,7 +59,7 @@ func TestTetrisGame(t *testing.T) {
 				Convey("should advance the board according to the level's speed", func() {
 					game.Level.speed = 12
 					game.Start()
-					time.Sleep(time.Second / 3)
+					time.Sleep(time.Second/3 + 50*time.Millisecond)
 
 					So(board.Active.Position.Y, ShouldEqual, board.height-board.Active.Height()-4)
 				})
@@ -79,9 +80,9 @@ func TestTetrisGame(t *testing.T) {
 		Convey("when a piece is anchored", func() {
 			game.shelf.pieces = makeShelf("A", "B", "C", "D")
 
-			game.Level = Level{0, 1, func() Piece {
+			game.Level.NextPiece = func() Piece {
 				return Piece{Name: "X", Orientations: Pieces.O.Orientations}
-			}, func(int) int { return 0 }}
+			}
 
 			game.Board.Anchored <- Pieces.I
 
@@ -141,10 +142,10 @@ func TestTetrisGame(t *testing.T) {
 
 			Convey("should load 4 pieces from the Level when the game starts", func() {
 				piece := 0
-				game.Level = Level{0, 1, func() Piece {
+				game.Level.NextPiece = func() Piece {
 					defer func() { piece++ }()
 					return Piece{Name: fmt.Sprintf("Piece %d", piece), Orientations: Pieces.O.Orientations}
-				}, func(int) int { return 0 }}
+				}
 
 				game.Start()
 				shelf := game.Shelf()
@@ -157,17 +158,11 @@ func TestTetrisGame(t *testing.T) {
 
 		Convey("when lines are cleared", func() {
 			pieces := []Piece{Pieces.T, Pieces.I, Pieces.I}
-			game.Level = Level{
-				number: 0,
-				speed:  1,
-				NextPiece: func() Piece {
-					p := pieces[0]
-					pieces = append(pieces[1:], p)
-					return p
-				},
-				Score: func(lines int) int {
-					return lines * lines // just so we get a different number for different input
-				}}
+			game.Level.NextPiece = func() Piece {
+				p := pieces[0]
+				pieces = append(pieces[1:], p)
+				return p
+			}
 			game.Board.plane[3] = row("* ********")
 			game.Board.plane[2] = row("********* ")
 			game.Board.plane[1] = row("***** ****")
@@ -214,6 +209,64 @@ func TestTetrisGame(t *testing.T) {
 					So(game.score, ShouldEqual, 4)
 				})
 			})
+		})
+
+		Convey("level 1", func() {
+
+			Convey("only produces O pieces", func() {
+				game.Start()
+				for i := 0; i < 8; i++ {
+					time.Sleep(100 * time.Millisecond)
+					So(game.Active.Piece, should.Resemble, Pieces.O)
+					game.Drop()
+				}
+			})
+
+			Convey("speed is about 1 tick per second (SLOW)", func() {
+				game.Start()
+				time.Sleep(750 * time.Millisecond)
+				So(game.Board.Active.Position.Y, should.Equal, 18) // O piece
+				time.Sleep(500 * time.Millisecond)
+				So(game.Board.Active.Position.Y, should.Equal, 17) // O piece
+			})
+
+			Convey("ends after 10 lines", func() {
+				oMoves := []func(){
+					func() {
+						for i := 0; i < 4; i++ {
+							game.MoveLeft()
+						}
+					}, // move left 4
+					func() {
+						for i := 0; i < 2; i++ {
+							game.MoveLeft()
+						}
+					}, // move left 2
+					func() {}, // no moves or rotations
+					func() {
+						for i := 0; i < 2; i++ {
+							game.MoveRight()
+						}
+					}, // move right 2
+					func() {
+						for i := 0; i < 4; i++ {
+							game.MoveRight()
+						}
+					}, // move right 4
+				}
+				game.Start()
+				So(game.Level.number, should.Equal, 1)
+				for j := 0; j < 5; j++ { // five O pieces make 2 lines, so do this 5 times to make 10 lines
+					for _, move := range oMoves {
+						move()
+						game.Drop()
+						time.Sleep(20 * time.Millisecond)
+					}
+				}
+				time.Sleep(50 * time.Millisecond)
+				So(game.Level.number, should.Equal, 2)
+			})
+
 		})
 	})
 }

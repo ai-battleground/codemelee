@@ -1,6 +1,7 @@
 package tetris
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -31,6 +32,7 @@ func (gs GameState) String() string {
 type Game struct {
 	score int
 	state GameState
+	lines int
 	shelf
 	Level
 	*Board
@@ -41,7 +43,8 @@ type Game struct {
 func NewGame() *Game {
 	g := &Game{
 		score:        0,
-		Level:        Levels[0],
+		lines:        0,
+		Level:        getLevel(0),
 		Board:        NewBoard(),
 		ShelfUpdated: make(chan [4]Piece),
 		PieceState:   make(chan ActivePiece)}
@@ -54,6 +57,8 @@ func NewGame() *Game {
 type Level struct {
 	number    int
 	speed     int64
+	maxLines  int
+	Next      func() Level
 	NextPiece func() Piece
 	Score     func(lines int) int
 }
@@ -75,7 +80,7 @@ func (g *Game) Start() {
 		g.Stage(first)
 	}
 	if g.state == Paused || g.state == PreStart {
-		go g.advance()
+		time.AfterFunc(time.Second/time.Duration(g.Level.speed), g.advance)
 	}
 	g.state = Running
 }
@@ -125,7 +130,12 @@ func (g *Game) handleAnchored() {
 }
 
 func (g *Game) handleClearedLines(lines []int) {
+	g.lines += len(lines)
 	g.score += g.Level.Score(len(lines))
+	fmt.Printf("Total lines cleared %d", g.lines)
+	if g.lines >= g.Level.maxLines {
+		g.Level = g.Level.Next()
+	}
 }
 
 func (g *Game) advancePiece() {
