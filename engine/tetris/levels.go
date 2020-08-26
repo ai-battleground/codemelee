@@ -36,7 +36,7 @@ var levels = [...]Level{
 
 func getLevel(i int) Level {
 	var l Level
-	if i > len(levels) {
+	if i > len(levels)-1 {
 		l = levels[len(levels)-1]
 	} else {
 		l = levels[i]
