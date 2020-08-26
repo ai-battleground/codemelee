@@ -1,5 +1,13 @@
 package tetris
 
+import "math/rand"
+
+func tutorialPieces() []Piece {
+	return []Piece{
+		Pieces.O, Pieces.I, Pieces.T,
+	}
+}
+
 var levels = [...]Level{
 	{
 		number:   1,
@@ -17,7 +25,8 @@ var levels = [...]Level{
 		speed:    1,
 		maxLines: 10,
 		NextPiece: func() Piece {
-			return Pieces.O
+			index := rand.Intn(2)
+			return tutorialPieces()[index]
 		},
 		Score: func(lines int) int {
 			return lines * lines

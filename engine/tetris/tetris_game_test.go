@@ -268,6 +268,35 @@ func TestTetrisGame(t *testing.T) {
 			})
 
 		})
+
+		Convey("level 2", func() {
+			game.Level = getLevel(1)
+
+			Convey("produces only O and I pieces", func() {
+				game.Start()
+				oCount := 0
+				iCount := 0
+				for i := 0; i < 15; i++ {
+					time.Sleep(10 * time.Millisecond)
+					So(game.Active.Piece.Name, should.BeIn, []string{"O", "I"})
+					if game.Active.Piece.Name == "O" {
+						oCount++
+						for i := 0; i < 4; i++ {
+							game.MoveLeft()
+						}
+					}
+					if game.Active.Piece.Name == "I" {
+						iCount++
+						game.RotateRight()
+						game.MoveRight()
+						game.MoveRight()
+					}
+					game.Drop()
+				}
+				So(oCount, should.BeGreaterThan, 0)
+				So(iCount, should.BeGreaterThan, 0)
+			})
+		})
 	})
 }
 
