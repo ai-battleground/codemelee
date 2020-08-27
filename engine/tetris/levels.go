@@ -29,7 +29,8 @@ var levels = [...]Level{
 			return tutorialPieces()[index]
 		},
 		Score: func(lines int) int {
-			return lines * lines
+			base := lines + 1
+			return base * base
 		},
 	},
 	{
@@ -41,7 +42,8 @@ var levels = [...]Level{
 			return tutorialPieces()[index]
 		},
 		Score: func(lines int) int {
-			return lines * lines
+			base := lines + 2
+			return base * base
 		},
 	}}
 
