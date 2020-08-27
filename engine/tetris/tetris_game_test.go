@@ -284,7 +284,7 @@ func TestTetrisGame(t *testing.T) {
 				game.Start()
 				oCount := 0
 				iCount := 0
-				for i := 0; i < 15; i++ {
+				for i := 0; i < 20; i++ {
 					time.Sleep(10 * time.Millisecond)
 					So(game.Active.Piece.Name, should.BeIn, []string{"O", "I"})
 					if game.Active.Piece.Name == "O" {
@@ -305,6 +305,37 @@ func TestTetrisGame(t *testing.T) {
 				So(iCount, should.BeGreaterThan, 0)
 			})
 		})
+		Convey("level 3", func() {
+			game.Level = getLevel(2)
+
+			Convey("produces only O, I, and T pieces", func() {
+				pieceCount := map[string]int{}
+				for i := 0; i < 30; i++ {
+					p := game.Level.NextPiece()
+					pieceCount[p.Name] += 1
+				}
+				So(len(pieceCount), ShouldEqual, 3)
+				for name, count := range pieceCount {
+					So(name, ShouldBeIn, []string{"O", "I", "T"})
+					So(count, ShouldBeGreaterThan, 0)
+				}
+			})
+		})
+		//Convey("level 4", func() {
+		//	game.Level = getLevel(3)
+		//	Convey("produces only O, I, T, L, J pieces", func() {
+		//		pieceCount := map[string]int{}
+		//		for i :=0; i<30; i++ {
+		//			p := game.Level.NextPiece()
+		//			pieceCount[p.Name] += 1
+		//		}
+		//		So(len(pieceCount), ShouldEqual, 3)
+		//		for name, count := range pieceCount {
+		//			So(name, ShouldBeIn, []string{"O", "I", "T", "L", "J"})
+		//			So(count, ShouldBeGreaterThan, 0)
+		//		}
+		//	})
+		//})
 	})
 }
 

@@ -32,7 +32,18 @@ var levels = [...]Level{
 			return lines * lines
 		},
 	},
-}
+	{
+		number:   3,
+		speed:    1,
+		maxLines: 10,
+		NextPiece: func() Piece {
+			index := rand.Intn(3)
+			return tutorialPieces()[index]
+		},
+		Score: func(lines int) int {
+			return lines * lines
+		},
+	}}
 
 func getLevel(i int) Level {
 	var l Level
