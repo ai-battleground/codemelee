@@ -132,14 +132,13 @@ func (b Board) wouldCollide(vector Point) bool {
 func (b Board) anyPointsCollide(position Point, points [4]Point) bool {
 	for _, p := range points {
 		testPoint := translate(position, p)
-		if testPoint.Y > 19 {
-			return false
-		}
-		if testPoint.Y < 0 || testPoint.X < 0 || testPoint.X >= 10 {
-			return true
-		}
-		if !b.space(testPoint).Empty() {
-			return true
+		if testPoint.Y < 20 {
+			if testPoint.Y < 0 || testPoint.X < 0 || testPoint.X >= 10 {
+				return true
+			}
+			if !b.space(testPoint).Empty() {
+				return true
+			}
 		}
 	}
 	return false

@@ -232,27 +232,27 @@ func TestTetrisGame(t *testing.T) {
 
 			Convey("ends after 10 lines", func() {
 				oMoves := []func(){
-					func() {
+					func() { // move left 4
 						for i := 0; i < 4; i++ {
 							game.MoveLeft()
 						}
-					}, // move left 4
-					func() {
+					},
+					func() { // move left 2
 						for i := 0; i < 2; i++ {
 							game.MoveLeft()
 						}
-					}, // move left 2
+					},
 					func() {}, // no moves or rotations
-					func() {
+					func() { // move right 2
 						for i := 0; i < 2; i++ {
 							game.MoveRight()
 						}
-					}, // move right 2
-					func() {
+					},
+					func() { // move right 4
 						for i := 0; i < 4; i++ {
 							game.MoveRight()
 						}
-					}, // move right 4
+					},
 				}
 				game.Start()
 				So(game.Level.number, should.Equal, 1)
