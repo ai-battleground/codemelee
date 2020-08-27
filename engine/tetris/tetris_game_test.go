@@ -156,6 +156,14 @@ func TestTetrisGame(t *testing.T) {
 			})
 		})
 
+		Convey("when a piece collides", func() {
+			for i := 0; i < 20; i++ {
+				game.Board.plane[i] = row("    **    ")
+			}
+			game.Start()
+			So(game.state, ShouldEqual, GameOver)
+		})
+
 		Convey("when lines are cleared", func() {
 			pieces := []Piece{Pieces.T, Pieces.I, Pieces.I}
 			game.Level.NextPiece = func() Piece {

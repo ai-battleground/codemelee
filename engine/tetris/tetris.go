@@ -50,6 +50,7 @@ func NewGame() *Game {
 		PieceState:   make(chan ActivePiece)}
 	go g.handleAnchored()
 	g.Board.OnClearedLines(g.handleClearedLines)
+	g.Board.OnCollision(g.handleCollision)
 
 	return g
 }
@@ -77,12 +78,12 @@ func (g *Game) Start() {
 		for i := 0; i < 4; i++ {
 			g.shelf.push(g.NextPiece())
 		}
-		g.Stage(first)
+		defer g.Stage(first)
 	}
 	if g.state == Paused || g.state == PreStart {
+		g.state = Running
 		time.AfterFunc(time.Second/time.Duration(g.Level.speed), g.advance)
 	}
-	g.state = Running
 }
 
 func (g *Game) Pause() {
@@ -136,6 +137,10 @@ func (g *Game) handleClearedLines(lines []int) {
 	if g.lines >= g.Level.maxLines {
 		g.Level = g.Level.Next()
 	}
+}
+
+func (g *Game) handleCollision() {
+	g.state = GameOver
 }
 
 func (g *Game) advancePiece() {
