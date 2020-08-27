@@ -23,7 +23,7 @@ var levels = [...]Level{
 	{
 		number:   2,
 		speed:    1,
-		maxLines: 10,
+		maxLines: 20,
 		NextPiece: func() Piece {
 			index := rand.Intn(2)
 			return tutorialPieces()[index]
@@ -35,7 +35,7 @@ var levels = [...]Level{
 	{
 		number:   3,
 		speed:    1,
-		maxLines: 10,
+		maxLines: 30,
 		NextPiece: func() Piece {
 			index := rand.Intn(3)
 			return tutorialPieces()[index]
