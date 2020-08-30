@@ -96,7 +96,7 @@ func TestTetrisBoard(t *testing.T) {
 				board.OnClearedLines(func(lines []int) {
 					cleared = lines
 				})
-				board.Drop()
+				board.HardDrop()
 
 				Convey("the line should be sent to observers", func() {
 					So(len(cleared), should.Equal, 1)
@@ -124,7 +124,7 @@ func TestTetrisBoard(t *testing.T) {
 				board.OnClearedLines(func(lines []int) {
 					cleared = lines
 				})
-				board.Drop()
+				board.HardDrop()
 
 				Convey("the lines should be sent to observers", func() {
 					So(len(cleared), should.Equal, 3)

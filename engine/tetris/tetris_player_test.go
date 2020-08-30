@@ -199,12 +199,12 @@ func TestTetrisPlayer(t *testing.T) {
 			})
 		})
 
-		Convey("when the player drops the piece", func() {
+		Convey("when the player hard drops the piece", func() {
 			board.Active.Piece = Pieces.O
 			board.Active.Position = Point{6, 17}
 
 			Convey("with no filled spaces below, the piece should anchor to the floor", func() {
-				board.Drop()
+				board.HardDrop()
 				select {
 				case anchoredPiece := <-board.Anchored:
 					So(anchoredPiece, ShouldResemble, Pieces.O)
@@ -218,7 +218,7 @@ func TestTetrisPlayer(t *testing.T) {
 			Convey("with a filled space below, the piece should anchor directly above it", func() {
 				board.plane[1] = row("    ***   ")
 				board.plane[0] = row("    *     ")
-				board.Drop()
+				board.HardDrop()
 
 				select {
 				case anchoredPiece := <-board.Anchored:

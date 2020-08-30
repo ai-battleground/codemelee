@@ -184,7 +184,7 @@ func TestTetrisGame(t *testing.T) {
 					game.MoveLeft()
 					game.MoveLeft()
 					game.MoveLeft()
-					game.Drop()
+					game.HardDrop()
 
 					So(game.score, ShouldEqual, 1)
 
@@ -193,10 +193,10 @@ func TestTetrisGame(t *testing.T) {
 						for i := 0; i < 5; i++ {
 							game.MoveRight()
 						}
-						game.Drop()
+						game.HardDrop()
 						time.Sleep(200 * time.Millisecond)
 						game.MoveRight()
-						game.Drop()
+						game.HardDrop()
 
 						So(game.score, ShouldEqual, 3)
 					})
@@ -207,12 +207,12 @@ func TestTetrisGame(t *testing.T) {
 					game.Start()
 					game.MoveRight()
 					game.MoveRight()
-					game.Drop()
+					game.HardDrop()
 					time.Sleep(200 * time.Millisecond)
 					game.MoveLeft()
 					game.MoveLeft()
 					game.MoveLeft()
-					game.Drop()
+					game.HardDrop()
 
 					So(game.score, ShouldEqual, 4)
 				})
@@ -226,7 +226,7 @@ func TestTetrisGame(t *testing.T) {
 				for i := 0; i < 8; i++ {
 					time.Sleep(100 * time.Millisecond)
 					So(game.Active.Piece, should.Resemble, Pieces.O)
-					game.Drop()
+					game.HardDrop()
 				}
 			})
 
@@ -267,7 +267,7 @@ func TestTetrisGame(t *testing.T) {
 				for j := 0; j < 5; j++ { // five O pieces make 2 lines, so do this 5 times to make 10 lines
 					for _, move := range oMoves {
 						move()
-						game.Drop()
+						game.HardDrop()
 						time.Sleep(20 * time.Millisecond)
 					}
 				}
@@ -299,7 +299,7 @@ func TestTetrisGame(t *testing.T) {
 						game.MoveRight()
 						game.MoveRight()
 					}
-					game.Drop()
+					game.HardDrop()
 				}
 				So(oCount, should.BeGreaterThan, 0)
 				So(iCount, should.BeGreaterThan, 0)

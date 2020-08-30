@@ -40,9 +40,13 @@ func (b *Board) rotateCounterclockwise() int {
 	return b.Active.Orientation - 1
 }
 
-func (b *Board) Drop() {
+func (b *Board) HardDrop() {
 	for !b.shouldAnchor() {
 		b.move(Point{0, -1})
 	}
 	b.anchor()
+}
+
+func (b *Board) SoftDrop() {
+	b.Advance()
 }
