@@ -1,6 +1,7 @@
 package tetris
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 )
@@ -38,17 +39,21 @@ func (b *Board) Stage(piece Piece) {
 	b.Active = &ActivePiece{piece, stagePosition, 0}
 
 	if b.anyPointsCollide(stagePosition, piece.Orientations[0]) {
-		var wg sync.WaitGroup
-		wg.Add(len(b.collisionObservers))
-		for _, o := range b.collisionObservers {
-			observer := o
-			go func() {
-				observer()
-				wg.Done()
-			}()
-		}
-		wg.Wait()
+		b.collide()
 	}
+}
+
+func (b *Board) collide() {
+	var wg sync.WaitGroup
+	wg.Add(len(b.collisionObservers))
+	for _, o := range b.collisionObservers {
+		observer := o
+		go func() {
+			observer()
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }
 
 func (b *Board) TakeSnapshot() string {
@@ -82,6 +87,10 @@ func (b *Board) OnCollision(observer func()) {
 
 func (b *Board) anchor() {
 	for _, p := range b.Active.Points() {
+		if translate(b.Active.Position, p).Y >= b.height {
+			fmt.Printf("Anchored piece %s too high! Ending game", b.Active.Name)
+			b.collide() // this should never happen but I want to catch it
+		}
 		b.space(translate(b.Active.Position, p)).contents = b.Active.Name[0]
 	}
 	go func() { b.Anchored <- b.Active.Piece }()
