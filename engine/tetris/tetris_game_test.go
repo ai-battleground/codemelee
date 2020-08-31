@@ -321,21 +321,21 @@ func TestTetrisGame(t *testing.T) {
 				}
 			})
 		})
-		//Convey("level 4", func() {
-		//	game.Level = getLevel(3)
-		//	Convey("produces only O, I, T, L, J pieces", func() {
-		//		pieceCount := map[string]int{}
-		//		for i :=0; i<30; i++ {
-		//			p := game.Level.NextPiece()
-		//			pieceCount[p.Name] += 1
-		//		}
-		//		So(len(pieceCount), ShouldEqual, 3)
-		//		for name, count := range pieceCount {
-		//			So(name, ShouldBeIn, []string{"O", "I", "T", "L", "J"})
-		//			So(count, ShouldBeGreaterThan, 0)
-		//		}
-		//	})
-		//})
+		Convey("level 4", func() {
+			game.Level = getLevel(3)
+			Convey("produces only O, I, T, L, J pieces", func() {
+				pieceCount := map[string]int{}
+				for i := 0; i < 30; i++ {
+					p := game.Level.NextPiece()
+					pieceCount[p.Name] += 1
+				}
+				So(len(pieceCount), ShouldEqual, 5)
+				for name, count := range pieceCount {
+					So(name, ShouldBeIn, []string{"O", "I", "T", "L", "J"})
+					So(count, ShouldBeGreaterThan, 0)
+				}
+			})
+		})
 	})
 }
 

@@ -4,7 +4,7 @@ import "math/rand"
 
 func tutorialPieces() []Piece {
 	return []Piece{
-		Pieces.O, Pieces.I, Pieces.T,
+		Pieces.O, Pieces.I, Pieces.T, Pieces.J, Pieces.L,
 	}
 }
 
@@ -43,6 +43,19 @@ var levels = [...]Level{
 		},
 		Score: func(lines int) int {
 			base := lines + 2
+			return base * base
+		},
+	},
+	{
+		number:   4,
+		speed:    1,
+		maxLines: 40,
+		NextPiece: func() Piece {
+			index := rand.Intn(5)
+			return tutorialPieces()[index]
+		},
+		Score: func(lines int) int {
+			base := lines + 3
 			return base * base
 		},
 	}}
