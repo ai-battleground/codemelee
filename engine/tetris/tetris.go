@@ -1,7 +1,6 @@
 package tetris
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -94,6 +93,10 @@ func (g Game) Score() int {
 	return g.score
 }
 
+func (g Game) Lines() int {
+	return g.lines
+}
+
 func (g Game) State() GameState {
 	return g.state
 }
@@ -133,7 +136,6 @@ func (g *Game) handleAnchored() {
 func (g *Game) handleClearedLines(lines []int) {
 	g.lines += len(lines)
 	g.score += g.Level.Score(len(lines))
-	fmt.Printf("Total lines cleared %d", g.lines)
 	if g.lines >= g.Level.maxLines {
 		g.Level = g.Level.Next()
 	}
