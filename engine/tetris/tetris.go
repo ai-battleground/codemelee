@@ -56,7 +56,7 @@ func NewGame() *Game {
 
 type Level struct {
 	number    int
-	speed     int64
+	speed     float32
 	maxLines  int
 	Next      func() Level
 	NextPiece func() Piece

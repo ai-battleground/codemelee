@@ -58,6 +58,8 @@ var Pieces = struct {
 	T Piece
 	L Piece
 	J Piece
+	S Piece
+	Z Piece
 }{
 	O: Piece{
 		Name: "O",
@@ -94,4 +96,18 @@ var Pieces = struct {
 			{{0, 1}, {1, 1}, {2, 0}, {2, 1}},
 			{{0, 0}, {1, 0}, {1, 1}, {1, 2}},
 		}},
+	S: Piece{
+		Name: "S",
+		Orientations: [][4]Point{
+			{{0, 0}, {1, 0}, {1, 1}, {2, 1}},
+			{{0, 1}, {0, 2}, {1, 0}, {1, 1}},
+		},
+	},
+	Z: Piece{
+		Name: "Z",
+		Orientations: [][4]Point{
+			{{0, 1}, {1, 0}, {1, 1}, {2, 0}},
+			{{0, 0}, {0, 1}, {1, 1}, {1, 2}},
+		},
+	},
 }

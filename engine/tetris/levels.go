@@ -2,9 +2,9 @@ package tetris
 
 import "math/rand"
 
-func tutorialPieces() []Piece {
+func pieces() []Piece {
 	return []Piece{
-		Pieces.O, Pieces.I, Pieces.T, Pieces.J, Pieces.L,
+		Pieces.O, Pieces.I, Pieces.T, Pieces.J, Pieces.L, Pieces.S, Pieces.Z,
 	}
 }
 
@@ -26,7 +26,7 @@ var levels = [...]Level{
 		maxLines: 20,
 		NextPiece: func() Piece {
 			index := rand.Intn(2)
-			return tutorialPieces()[index]
+			return pieces()[index]
 		},
 		Score: func(lines int) int {
 			base := lines + 1
@@ -39,7 +39,7 @@ var levels = [...]Level{
 		maxLines: 30,
 		NextPiece: func() Piece {
 			index := rand.Intn(3)
-			return tutorialPieces()[index]
+			return pieces()[index]
 		},
 		Score: func(lines int) int {
 			base := lines + 2
@@ -52,10 +52,49 @@ var levels = [...]Level{
 		maxLines: 40,
 		NextPiece: func() Piece {
 			index := rand.Intn(5)
-			return tutorialPieces()[index]
+			return pieces()[index]
 		},
 		Score: func(lines int) int {
 			base := lines + 3
+			return base * base
+		},
+	},
+	{
+		number:   5,
+		speed:    1.05,
+		maxLines: 50,
+		NextPiece: func() Piece {
+			index := rand.Intn(5)
+			return pieces()[index]
+		},
+		Score: func(lines int) int {
+			base := lines + 4
+			return base * base
+		},
+	},
+	{
+		number:   6,
+		speed:    1.1,
+		maxLines: 60,
+		NextPiece: func() Piece {
+			index := rand.Intn(7)
+			return pieces()[index]
+		},
+		Score: func(lines int) int {
+			base := lines + 5
+			return base * base
+		},
+	},
+	{
+		number:   7,
+		speed:    1.15,
+		maxLines: 70,
+		NextPiece: func() Piece {
+			index := rand.Intn(7)
+			return pieces()[index]
+		},
+		Score: func(lines int) int {
+			base := lines + 6
 			return base * base
 		},
 	}}
