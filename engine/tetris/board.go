@@ -138,9 +138,9 @@ func (b Board) wouldCollide(vector Point) bool {
 	return b.anyPointsCollide(position, b.Active.Points())
 }
 
-func (b Board) anyPointsCollide(position Point, points [4]Point) bool {
+func (b Board) anyPointsCollide(origin Point, points [4]Point) bool {
 	for _, p := range points {
-		testPoint := translate(position, p)
+		testPoint := translate(origin, p)
 		if testPoint.Y < 20 {
 			if testPoint.Y < 0 || testPoint.X < 0 || testPoint.X >= 10 {
 				return true
@@ -148,6 +148,15 @@ func (b Board) anyPointsCollide(position Point, points [4]Point) bool {
 			if !b.space(testPoint).Empty() {
 				return true
 			}
+		}
+	}
+	return false
+}
+
+func (b Board) anyPointsTooHigh(origin Point, points [4]Point) bool {
+	for _, point := range points {
+		if translate(origin, point).Y >= b.height {
+			return true
 		}
 	}
 	return false

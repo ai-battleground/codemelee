@@ -116,6 +116,18 @@ func TestTetrisPlayer(t *testing.T) {
 						So(board.Active.Position.X, ShouldEqual, 1)
 					})
 				})
+
+				Convey("once, at the top", func() {
+					board.Active.Position = Point{4, board.height - board.Active.Height()}
+					board.RotateRight()
+
+					Convey("no points should be above the ceiling", func() {
+						for _, piecePoint := range board.Active.Points() {
+							absolutePos := translate(board.Active.Position, piecePoint)
+							So(absolutePos.Y, ShouldBeLessThan, board.height)
+						}
+					})
+				})
 			})
 
 			Convey("an O piece", func() {
@@ -194,6 +206,21 @@ func TestTetrisPlayer(t *testing.T) {
 							So(board.Active.Points(), ShouldResemble,
 								[4]Point{Point{0, 1}, Point{1, 0}, Point{1, 1}, Point{1, 2}})
 						})
+					})
+				})
+			})
+
+			Convey("a J piece", func() {
+				board.Active.Piece = Pieces.J
+				Convey("once, at the top", func() {
+					board.Active.Position = Point{4, board.height - board.Active.Height()}
+					board.RotateRight()
+
+					Convey("no points should be above the ceiling", func() {
+						for _, piecePoint := range board.Active.Points() {
+							absolutePos := translate(board.Active.Position, piecePoint)
+							So(absolutePos.Y, ShouldBeLessThan, board.height)
+						}
 					})
 				})
 			})

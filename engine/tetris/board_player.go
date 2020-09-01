@@ -19,6 +19,9 @@ func (b *Board) RotateRight() {
 func (b *Board) rotate(targetOrientation int) {
 	targetPosition := b.Active.Position
 
+	for b.anyPointsTooHigh(targetPosition, b.Active.Orientations[targetOrientation]) {
+		targetPosition.Y--
+	}
 	for b.anyPointsCollide(targetPosition, b.Active.Orientations[targetOrientation]) &&
 		targetPosition.X >= 0 {
 		targetPosition.X--

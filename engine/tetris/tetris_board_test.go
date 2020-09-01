@@ -201,6 +201,19 @@ func TestTetrisBoard(t *testing.T) {
 				snapshotRelevantLines := strings.Join(snapshotLines[1:4], "\n")
 				So(snapshotRelevantLines, ShouldEqual, expectedPieceLines)
 			})
+
+			Convey("it should work when the active piece is too high", func() {
+				board.Stage(Pieces.J)
+				board.RotateLeft()
+				snapshot := board.TakeSnapshot()
+				snapshotLines := strings.Split(snapshot, "\n")
+
+				expectedPieceLines := "     J    \n" +
+					"     J    \n" +
+					"    JJ    "
+				snapshotRelevantLines := strings.Join(snapshotLines[0:3], "\n")
+				So(snapshotRelevantLines, ShouldEqual, expectedPieceLines)
+			})
 		})
 	})
 }
