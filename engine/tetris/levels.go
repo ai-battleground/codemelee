@@ -1,6 +1,22 @@
 package tetris
 
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
+
+type Level struct {
+	number    int
+	speed     float32
+	maxLines  int
+	Next      func() Level
+	NextPiece func() Piece
+	Score     func(lines int) int
+}
+
+func (l Level) TickDuration() time.Duration {
+	return time.Duration(1/l.speed) * time.Second
+}
 
 func pieces() []Piece {
 	return []Piece{

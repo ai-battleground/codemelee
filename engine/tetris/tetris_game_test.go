@@ -55,14 +55,6 @@ func TestTetrisGame(t *testing.T) {
 					game.Start()
 					So(board.Active.Position.Y, ShouldEqual, board.height-board.Active.Height())
 				})
-
-				Convey("should advance the board according to the level's speed", func() {
-					game.Level.speed = 12
-					game.Start()
-					time.Sleep(time.Second/3 + 50*time.Millisecond)
-
-					So(board.Active.Position.Y, ShouldEqual, board.height-board.Active.Height()-4)
-				})
 			})
 
 			Convey("the shelf", func() {
@@ -228,14 +220,6 @@ func TestTetrisGame(t *testing.T) {
 					So(game.Active.Piece, should.Resemble, Pieces.O)
 					game.HardDrop()
 				}
-			})
-
-			Convey("speed is about 1 tick per second (SLOW)", func() {
-				game.Start()
-				time.Sleep(750 * time.Millisecond)
-				So(game.Board.Active.Position.Y, should.Equal, 18) // O piece
-				time.Sleep(500 * time.Millisecond)
-				So(game.Board.Active.Position.Y, should.Equal, 17) // O piece
 			})
 
 			Convey("ends after 10 lines", func() {

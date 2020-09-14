@@ -1,9 +1,5 @@
 package tetris
 
-import (
-	"time"
-)
-
 type GameState int
 
 const (
@@ -54,15 +50,6 @@ func NewGame() *Game {
 	return g
 }
 
-type Level struct {
-	number    int
-	speed     float32
-	maxLines  int
-	Next      func() Level
-	NextPiece func() Piece
-	Score     func(lines int) int
-}
-
 type shelf struct {
 	pieces [4]Piece
 	head   int
@@ -81,7 +68,6 @@ func (g *Game) Start() {
 	}
 	if g.state == Paused || g.state == PreStart {
 		g.state = Running
-		time.AfterFunc(time.Second/time.Duration(g.Level.speed), g.advance)
 	}
 }
 
@@ -118,11 +104,10 @@ func (s *shelf) next() Piece {
 	return s.pieces[s.head]
 }
 
-func (g *Game) advance() {
+func (g *Game) Advance() {
 	if g.state == Running {
 		g.Board.Advance()
 		go func() { g.PieceState <- *g.Active }()
-		time.AfterFunc(time.Second/time.Duration(g.Level.speed), g.advance)
 	}
 }
 
