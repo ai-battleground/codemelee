@@ -13,7 +13,7 @@ func TestTetrisGame(t *testing.T) {
 		game := NewGame()
 
 		Convey("the initial level should be 1", func() {
-			So(game.Level.number, ShouldEqual, 1)
+			So(game.Level.Number, ShouldEqual, 1)
 		})
 
 		Convey("the initial speed should be 1", func() {
@@ -247,7 +247,7 @@ func TestTetrisGame(t *testing.T) {
 					},
 				}
 				game.Start()
-				So(game.Level.number, should.Equal, 1)
+				So(game.Level.Number, should.Equal, 1)
 				for j := 0; j < 5; j++ { // five O pieces make 2 lines, so do this 5 times to make 10 lines
 					for _, move := range oMoves {
 						move()
@@ -256,7 +256,7 @@ func TestTetrisGame(t *testing.T) {
 					}
 				}
 				time.Sleep(50 * time.Millisecond)
-				So(game.Level.number, should.Equal, 2)
+				So(game.Level.Number, should.Equal, 2)
 			})
 
 		})

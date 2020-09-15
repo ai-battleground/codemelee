@@ -2,20 +2,15 @@ package tetris
 
 import (
 	"math/rand"
-	"time"
 )
 
 type Level struct {
-	number    int
+	Number    int
 	speed     float32
 	maxLines  int
 	Next      func() Level
 	NextPiece func() Piece
 	Score     func(lines int) int
-}
-
-func (l Level) TickDuration() time.Duration {
-	return time.Duration(1/l.speed) * time.Second
 }
 
 func pieces() []Piece {
@@ -26,7 +21,7 @@ func pieces() []Piece {
 
 var levels = [...]Level{
 	{
-		number:   1,
+		Number:   1,
 		speed:    1,
 		maxLines: 10,
 		NextPiece: func() Piece {
@@ -37,7 +32,7 @@ var levels = [...]Level{
 		},
 	},
 	{
-		number:   2,
+		Number:   2,
 		speed:    1,
 		maxLines: 20,
 		NextPiece: func() Piece {
@@ -50,7 +45,7 @@ var levels = [...]Level{
 		},
 	},
 	{
-		number:   3,
+		Number:   3,
 		speed:    1,
 		maxLines: 30,
 		NextPiece: func() Piece {
@@ -63,7 +58,7 @@ var levels = [...]Level{
 		},
 	},
 	{
-		number:   4,
+		Number:   4,
 		speed:    1,
 		maxLines: 40,
 		NextPiece: func() Piece {
@@ -76,7 +71,7 @@ var levels = [...]Level{
 		},
 	},
 	{
-		number:   5,
+		Number:   5,
 		speed:    1.05,
 		maxLines: 50,
 		NextPiece: func() Piece {
@@ -89,7 +84,7 @@ var levels = [...]Level{
 		},
 	},
 	{
-		number:   6,
+		Number:   6,
 		speed:    1.1,
 		maxLines: 60,
 		NextPiece: func() Piece {
@@ -102,7 +97,7 @@ var levels = [...]Level{
 		},
 	},
 	{
-		number:   7,
+		Number:   7,
 		speed:    1.15,
 		maxLines: 70,
 		NextPiece: func() Piece {

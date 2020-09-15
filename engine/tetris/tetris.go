@@ -1,5 +1,7 @@
 package tetris
 
+import "time"
+
 type GameState int
 
 const (
@@ -85,6 +87,10 @@ func (g Game) Lines() int {
 
 func (g Game) State() GameState {
 	return g.state
+}
+
+func (g Game) TickDuration() time.Duration {
+	return time.Duration(1/g.Level.speed) * time.Second
 }
 
 func (s *shelf) Shelf() [4]Piece {
