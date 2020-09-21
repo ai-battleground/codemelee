@@ -214,6 +214,15 @@ func TestTetrisBoard(t *testing.T) {
 				snapshotRelevantLines := strings.Join(snapshotLines[0:3], "\n")
 				So(snapshotRelevantLines, ShouldEqual, expectedPieceLines)
 			})
+
+			Convey("it should work when the active piece is too low", func() {
+				board.Stage(Pieces.J)
+				board.Active.Position.X = 8
+				board.Active.Position.Y = -1
+				snapshot := board.TakeSnapshot()
+				snapshotLines := strings.Split(snapshot, "\n")
+				So(snapshotLines[19], ShouldEqual, "OO  TTT J ")
+			})
 		})
 	})
 }

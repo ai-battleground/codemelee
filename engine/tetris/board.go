@@ -69,9 +69,11 @@ func (b *Board) TakeSnapshot() string {
 	if len(b.Active.Name) > 0 {
 		for _, point := range b.Active.Points() {
 			boardPoint := translate(b.Active.Position, point)
-			line := []byte(snapshotLines[b.height-1-boardPoint.Y])
-			line[boardPoint.X] = byte(b.Active.Name[0])
-			snapshotLines[b.height-1-boardPoint.Y] = string(line)
+			if boardPoint.Y >= 0 {
+				line := []byte(snapshotLines[b.height-1-boardPoint.Y])
+				line[boardPoint.X] = byte(b.Active.Name[0])
+				snapshotLines[b.height-1-boardPoint.Y] = string(line)
+			}
 		}
 	}
 	return strings.Join(snapshotLines, "\n")

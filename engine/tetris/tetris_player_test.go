@@ -128,6 +128,19 @@ func TestTetrisPlayer(t *testing.T) {
 						}
 					})
 				})
+
+				Convey("once, at the bottom when it's horizontal", func() {
+					board.RotateRight()
+					board.Active.Position = Point{4, 0}
+
+					Convey("no points should be below the bottom", func() {
+						board.RotateRight()
+						for _, piecePoint := range board.Active.Points() {
+							absolutePos := translate(board.Active.Position, piecePoint)
+							So(absolutePos.Y, ShouldBeGreaterThanOrEqualTo, 0)
+						}
+					})
+				})
 			})
 
 			Convey("an O piece", func() {
