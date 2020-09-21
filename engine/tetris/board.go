@@ -127,6 +127,9 @@ func (b *Board) clearLines() {
 func (b *Board) move(vector Point) {
 	if !b.wouldCollide(vector) {
 		destination := translate(b.Active.Position, vector)
+		if destination.Y < 0 {
+			panic("piece can not be at negative position")
+		}
 		b.Active.Position = destination
 	}
 }
