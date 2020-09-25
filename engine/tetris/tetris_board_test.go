@@ -223,6 +223,18 @@ func TestTetrisBoard(t *testing.T) {
 				snapshotLines := strings.Split(snapshot, "\n")
 				So(snapshotLines[19], ShouldEqual, "OO  TTT J ")
 			})
+
+			Convey("it should work when the pieces are stacked too high", func() {
+				for _, p := range []Piece{Pieces.O, Pieces.I, Pieces.I, Pieces.I, Pieces.I, Pieces.I} {
+					board.Stage(p)
+					board.HardDrop()
+					anchored := <-board.Anchored
+					So(anchored.Name, ShouldEqual, p.Name)
+				}
+				snapshot := board.TakeSnapshot()
+				snapshotLines := strings.Split(snapshot, "\n")
+				So(snapshotLines[0], ShouldEqual, "    I     ")
+			})
 		})
 	})
 }
