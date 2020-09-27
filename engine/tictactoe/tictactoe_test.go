@@ -94,6 +94,15 @@ func (this *TicTacToeFixture) TestOneTurnAtATime() {
 	this.So(err, should.BeError, tictactoe.MoveOutOfTurn)
 }
 
+func (this *TicTacToeFixture) TestGameOver_3x3_NextMoveIsEmpty() {
+	this.normalBoard.X(0, 0)
+	this.normalBoard.O(0, 1)
+	this.normalBoard.X(1, 0)
+	this.normalBoard.O(0, 2)
+	this.normalBoard.X(2, 0) // three in a row
+	this.So(this.normalBoard.NextMove(), should.Equal, tictactoe.CellStateEmpty)
+}
+
 func (this *TicTacToeFixture) TestXWins_3x3_Horizontally() {
 	this.normalBoard.X(0, 0)
 	this.normalBoard.O(0, 1)

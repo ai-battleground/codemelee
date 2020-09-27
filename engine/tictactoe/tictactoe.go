@@ -59,6 +59,25 @@ func (b Board) GameOutcome() GameOutcome {
 	return Draw
 }
 
+func (b Board) NextMove() CellState {
+	if b.GameOutcome() != Undetermined {
+		return CellStateEmpty
+	}
+	moves := 0
+	for _, row := range b.cells {
+		for _, cell := range row {
+			if cell != CellStateEmpty {
+				moves++
+			}
+		}
+	}
+	if moves%2 == 1 {
+		return CellStateO
+	} else {
+		return CellStateX
+	}
+}
+
 func (b Board) score(state CellState) bool {
 	for _, r := range b.rows() {
 		if contiguousCells(state, 3, r) {
