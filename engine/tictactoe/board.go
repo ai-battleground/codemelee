@@ -55,10 +55,10 @@ func (b *Board) O(x, y int) error {
 
 func (b *Board) move(x, y int, move CellState) error {
 	rules := []Rule{
-		b.CheckMoveIsPossible(x, y),
-		b.CheckXGoesFirst(move),
-		b.CheckTakingTurns(move),
-		b.CheckUnoccupied(x, y)}
+		b.checkMoveIsPossible(x, y),
+		b.checkXGoesFirst(move),
+		b.checkTakingTurns(move),
+		b.checkUnoccupied(x, y)}
 
 	for _, rule := range rules {
 		v, ok := rule()
