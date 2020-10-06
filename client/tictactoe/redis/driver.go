@@ -67,11 +67,23 @@ func (d Driver) Confirm(bot, challenge string) string {
 		return ""
 	}
 	// if it's there, put the game ID under match key and generate a token
-	token := xid.New().String()
-	err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
-		"match", game,
-		"token", token))
+	var token string
+	err = d.pool.Do(radix.Cmd(&token, "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token"))
 	if err != nil {
+		return ""
+	}
+	if token == "" {
+		token = xid.New().String()
+		err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
+			"match", game,
+			"token", token))
+		if err != nil {
+			return ""
+		}
+	}
+	var confirmed bool
+	err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", game)))
+	if err != nil || !confirmed {
 		return ""
 	}
 	d.token[fmt.Sprintf("%s:%s", bot, game)] = token
@@ -110,7 +122,7 @@ func (d Driver) Observe(bot, game string) Observation {
 				}
 			}
 		case k == "boards":
-			fmt.Printf("[driver] boards: %s\n", v)
+			fmt.Printf("[driver] boards: \n%s\n", v)
 			for _, b := range strings.Split(v, "\n") {
 				o.Boards = append(o.Boards, []byte(b))
 			}
