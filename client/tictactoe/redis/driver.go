@@ -70,23 +70,23 @@ func (d Driver) Confirm(bot, challenge string) string {
 	var token string
 	err = d.pool.Do(radix.Cmd(&token, "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token"))
 	if err != nil {
-		fmt.Printf("Error getting token %s", challenge)
+		fmt.Printf("Error getting token %s\n", challenge)
 		return ""
 	}
 	if token == "" {
 		token = xid.New().String()
-		err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
-			"match", game,
-			"token", token))
-		if err != nil {
-			fmt.Printf("Error setting token %s", challenge)
-			return ""
-		}
+	}
+	err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
+		"match", game,
+		"token", token))
+	if err != nil {
+		fmt.Printf("Error setting token %s\n", challenge)
+		return ""
 	}
 	var confirmed bool
-	err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s/%s", challenge, game)))
+	err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", game)))
 	if err != nil || !confirmed {
-		fmt.Printf("No observation available %s", game)
+		fmt.Printf("No observation available %s\n", game)
 		return ""
 	}
 	d.token[fmt.Sprintf("%s:%s", bot, game)] = token
