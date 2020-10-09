@@ -50,7 +50,6 @@ func (d Driver) Challenge(bot string, boards int, opponent string) (string, erro
 	key := fmt.Sprintf("challenge:tictactoe:%s", challengeId)
 	hsetArgs := []string{key,
 		"boards", strconv.Itoa(boards),
-		"token", xid.New().String(),
 	}
 	if opponent != "" {
 		hsetArgs = append(hsetArgs, "opponent", opponent)
@@ -64,34 +63,35 @@ func (d Driver) Challenge(bot string, boards int, opponent string) (string, erro
 }
 
 func (d Driver) Confirm(bot, challenge string) string {
-	var game string
-	err := d.pool.Do(radix.Cmd(&game, "GET", fmt.Sprintf("opportunity:tictactoe:%s", challenge)))
-	if err != nil || game == "" {
+	var reply []string
+	err := d.pool.Do(radix.Cmd(&reply, "HMGET", fmt.Sprintf("opportunity:tictactoe:%s", challenge), "match", "token"))
+	if err != nil || len(reply) != 2 {
+		fmt.Printf("error getting opportunity %s", challenge)
+		return ""
+	}
+	game, token := reply[0], reply[1]
+	if game == "" {
 		fmt.Printf("No opportunity found %s\n", challenge)
 		return ""
 	}
-	var token string
-	err = d.pool.Do(radix.Cmd(&token, "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token"))
-	if err != nil {
-		fmt.Printf("Error getting token %s\n", challenge)
-		return ""
-	}
-	fmt.Printf("%s %s %s: %s\n", "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token", token)
 	if token == "" {
-		fmt.Printf("No token found %s", challenge)
-		return ""
-	} else {
-		fmt.Printf("Using token *****%s\n", token[15:20])
+		fmt.Printf("No existing token found %s\n", challenge)
+		token = xid.New().String()
+		err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("opportunity:tictactoe:%s", challenge),
+			"token", token))
+		if err != nil {
+			fmt.Printf("Error providing token for %s\n", challenge)
+			return ""
+		}
 	}
+	fmt.Printf("Using token *****%s\n", token[15:20])
 	err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
 		"match", game))
 	if err != nil {
 		fmt.Printf("Error confirming challenge %s\n", challenge)
 		return ""
 	}
-	fmt.Printf("%s %s [%s: %s] [%s: %s]\n", "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
-		"match", game)
-	fmt.Printf("Confirmed challenge with token *****%s\n", token[15:20])
+	fmt.Printf("Confirmed challenge %s: %s\n", challenge, game)
 
 	var confirmed bool
 	err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", game)))
@@ -100,7 +100,7 @@ func (d Driver) Confirm(bot, challenge string) string {
 		return ""
 	}
 	d.token[fmt.Sprintf("%s:%s", bot, game)] = token
-	fmt.Printf("Confirmed %s\n", game)
+	fmt.Printf("Confirmation validated %s\n", game)
 	return game
 }
 
