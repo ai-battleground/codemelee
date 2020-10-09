@@ -64,6 +64,7 @@ func (d Driver) Confirm(bot, challenge string) string {
 	// look for opportunity
 	err := d.pool.Do(radix.Cmd(&game, "GET", fmt.Sprintf("opportunity:tictactoe:%s", challenge)))
 	if err != nil || game == "" {
+		fmt.Printf("No opportunity found %s\n", challenge)
 		return ""
 	}
 	// if it's there, put the game ID under match key and generate a token
@@ -90,6 +91,7 @@ func (d Driver) Confirm(bot, challenge string) string {
 		return ""
 	}
 	d.token[fmt.Sprintf("%s:%s", bot, game)] = token
+	fmt.Printf("Confirmed %s\n", game)
 	return game
 }
 
