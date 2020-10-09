@@ -48,7 +48,10 @@ func (d Driver) Challenge(bot string, boards int, opponent string) (string, erro
 	challengeId := fmt.Sprintf("%s:%s", bot, id.String())
 	// create challenge
 	key := fmt.Sprintf("challenge:tictactoe:%s", challengeId)
-	hsetArgs := []string{key, "boards", strconv.Itoa(boards)}
+	hsetArgs := []string{key,
+		"boards", strconv.Itoa(boards),
+		"token", xid.New().String(),
+	}
 	if opponent != "" {
 		hsetArgs = append(hsetArgs, "opponent", opponent)
 	}
@@ -56,18 +59,17 @@ func (d Driver) Challenge(bot string, boards int, opponent string) (string, erro
 	if err != nil {
 		return "", err
 	}
+
 	return challengeId, nil
 }
 
 func (d Driver) Confirm(bot, challenge string) string {
 	var game string
-	// look for opportunity
 	err := d.pool.Do(radix.Cmd(&game, "GET", fmt.Sprintf("opportunity:tictactoe:%s", challenge)))
 	if err != nil || game == "" {
 		fmt.Printf("No opportunity found %s\n", challenge)
 		return ""
 	}
-	// if it's there, put the game ID under match key and generate a token
 	var token string
 	err = d.pool.Do(radix.Cmd(&token, "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token"))
 	if err != nil {
@@ -76,21 +78,19 @@ func (d Driver) Confirm(bot, challenge string) string {
 	}
 	fmt.Printf("%s %s %s: %s\n", "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token", token)
 	if token == "" {
-		token = xid.New().String()
-		fmt.Printf("Making new token *****%s\n", token[15:20])
+		fmt.Printf("No token found %s", challenge)
+		return ""
 	} else {
-		fmt.Printf("Using old token *****%s\n", token[15:20])
+		fmt.Printf("Using token *****%s\n", token[15:20])
 	}
 	err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
-		"match", game,
-		"token", token))
+		"match", game))
 	if err != nil {
 		fmt.Printf("Error confirming challenge %s\n", challenge)
 		return ""
 	}
 	fmt.Printf("%s %s [%s: %s] [%s: %s]\n", "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
-		"match", game,
-		"token", token)
+		"match", game)
 	fmt.Printf("Confirmed challenge with token *****%s\n", token[15:20])
 
 	var confirmed bool
