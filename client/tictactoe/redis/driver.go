@@ -76,17 +76,19 @@ func (d Driver) Confirm(bot, challenge string) string {
 	}
 	if token == "" {
 		token = xid.New().String()
-		fmt.Printf("Making new token *****%s", token[15:20])
+		fmt.Printf("Making new token *****%s\n", token[15:20])
 	} else {
-		fmt.Printf("Using old token *****%s", token[15:20])
+		fmt.Printf("Using old token *****%s\n", token[15:20])
 	}
 	err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
 		"match", game,
 		"token", token))
 	if err != nil {
-		fmt.Printf("Error setting token %s\n", challenge)
+		fmt.Printf("Error confirming challenge %s\n", challenge)
 		return ""
 	}
+	fmt.Printf("Confirmed challenge with token *****%s\n", token[15:20])
+
 	var confirmed bool
 	err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", game)))
 	if err != nil || !confirmed {
