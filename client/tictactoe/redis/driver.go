@@ -74,7 +74,7 @@ func (d Driver) Confirm(bot, challenge string) string {
 		fmt.Printf("Error getting token %s\n", challenge)
 		return ""
 	}
-	fmt.Printf("%s %s %s: %s", "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token", token)
+	fmt.Printf("%s %s %s: %s\n", "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token", token)
 	if token == "" {
 		token = xid.New().String()
 		fmt.Printf("Making new token *****%s\n", token[15:20])
@@ -88,6 +88,9 @@ func (d Driver) Confirm(bot, challenge string) string {
 		fmt.Printf("Error confirming challenge %s\n", challenge)
 		return ""
 	}
+	fmt.Printf("%s %s [%s: %s] [%s: %s]\n", "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
+		"match", game,
+		"token", token)
 	fmt.Printf("Confirmed challenge with token *****%s\n", token[15:20])
 
 	var confirmed bool
