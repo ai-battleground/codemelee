@@ -70,6 +70,7 @@ func (d Driver) Confirm(bot, challenge string) string {
 	var token string
 	err = d.pool.Do(radix.Cmd(&token, "HGET", fmt.Sprintf("challenge:tictactoe:%s", challenge), "token"))
 	if err != nil {
+		fmt.Printf("Error getting token %s", challenge)
 		return ""
 	}
 	if token == "" {
@@ -78,12 +79,14 @@ func (d Driver) Confirm(bot, challenge string) string {
 			"match", game,
 			"token", token))
 		if err != nil {
+			fmt.Printf("Error setting token %s", challenge)
 			return ""
 		}
 	}
 	var confirmed bool
-	err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", game)))
+	err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s/%s", challenge, game)))
 	if err != nil || !confirmed {
+		fmt.Printf("No observation available %s", game)
 		return ""
 	}
 	d.token[fmt.Sprintf("%s:%s", bot, game)] = token
