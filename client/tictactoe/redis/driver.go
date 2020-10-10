@@ -136,7 +136,6 @@ func (d Driver) Observe(bot, game string) Observation {
 				}
 			}
 		case k == "boards":
-			fmt.Printf("[driver] boards: \n%s\n", v)
 			for _, b := range strings.Split(v, "\n") {
 				o.Boards = append(o.Boards, []byte(b))
 			}
