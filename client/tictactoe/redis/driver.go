@@ -85,6 +85,17 @@ func (d Driver) Confirm(bot, challenge string) string {
 		}
 	}
 	fmt.Printf("Using token *****%s\n", token[15:20])
+	var valid bool
+	err = d.pool.Do(radix.Cmd(&valid, "EXISTS", fmt.Sprintf("challenge:tictactoe:%s", challenge)))
+	if err != nil {
+		fmt.Printf("Error confirming challenge %s\n", challenge)
+		return ""
+	}
+	if !valid {
+		fmt.Printf("Challenge missing %s\n", challenge)
+		return ""
+	}
+
 	err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
 		"match", game))
 	if err != nil {
