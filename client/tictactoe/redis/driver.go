@@ -98,23 +98,31 @@ func (d Driver) Confirm(bot, challenge string) string {
 		return ""
 	}
 
-	err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
-		"match", game))
-	if err != nil {
-		fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), challenge)
-		return ""
-	}
-	fmt.Printf("%s Confirmed challenge %s: %s\n", time.Now().Format(logTimeFormat), challenge, game)
-
-	// TODO: This will loop forever when the other player doesn't confirm
 	var confirmed bool
 	for !confirmed {
+		var currentGame string
+		err = d.pool.Do(radix.Cmd(&currentGame, "HGET", fmt.Sprintf("opportunity:tictactoe:%s", challenge), "match"))
+		if err != nil {
+			fmt.Printf("%s error getting current game %s, %v", time.Now().Format(logTimeFormat), challenge, err)
+			return ""
+		}
+		if currentGame != game {
+			game = currentGame
+			err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
+				"match", game))
+			if err != nil {
+				fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), challenge)
+				return ""
+			}
+			fmt.Printf("%s Confirmed challenge %s: %s\n", time.Now().Format(logTimeFormat), challenge, game)
+		}
+
 		err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", game)))
 		if err != nil {
 			fmt.Printf("%s No observation available %s\n", time.Now().Format(logTimeFormat), game)
 			return ""
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(250 * time.Millisecond)
 	}
 	d.token[fmt.Sprintf("%s:%s", bot, game)] = token
 	fmt.Printf("%s Confirmation validated %s\n", time.Now().Format(logTimeFormat), game)
