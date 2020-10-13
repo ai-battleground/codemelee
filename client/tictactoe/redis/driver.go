@@ -106,14 +106,14 @@ func (d Driver) Confirm(bot, challenge string) string {
 			fmt.Printf("%s error getting current game %s, %v", time.Now().Format(logTimeFormat), challenge, err)
 			return ""
 		}
+		err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
+			"match", currentGame))
+		if err != nil {
+			fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), challenge)
+			return ""
+		}
 		if currentGame != game {
 			game = currentGame
-			err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
-				"match", game))
-			if err != nil {
-				fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), challenge)
-				return ""
-			}
 			fmt.Printf("%s Confirmed challenge %s: %s\n", time.Now().Format(logTimeFormat), challenge, game)
 		}
 
