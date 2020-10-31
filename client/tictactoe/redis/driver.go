@@ -26,10 +26,10 @@ func NewDriver(redisUrl string) (Driver, error) {
 	}
 	u, err := url.Parse(redisUrl)
 	if err != nil {
-		return d, fmt.Errorf("Invalid redis URL %s: %w", u, err)
+		return d, fmt.Errorf("invalid redis URL %s: %w", u, err)
 	}
 	if u.Scheme != "redis" {
-		return d, fmt.Errorf("Invalid redis URL: scheme %s not recognized", u.Scheme)
+		return d, fmt.Errorf("invalid redis URL: scheme %s not recognized", u.Scheme)
 	}
 	if len(u.Port()) == 0 {
 		u.Host = u.Hostname() + ":6379"
