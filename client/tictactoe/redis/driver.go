@@ -11,6 +11,7 @@ import (
 )
 
 const logTimeFormat = "2006-01-02 15:04:05.000"
+const ChallengeLifetimeSecs = 30
 
 type Driver struct {
 	pool               *radix.Pool
@@ -38,30 +39,36 @@ func NewDriver(redisUrl string) (Driver, error) {
 	return d, err
 }
 
-func (d Driver) Challenge(bot string, boards int, opponent string) (string, error) {
+func (d Driver) Challenge(bot string, boards int, opponent string, userKey string) error {
 	if bot == "" {
-		return "", fmt.Errorf("bot name is required")
+		return fmt.Errorf("bot name is required")
 	}
 	if boards < 1 {
-		return "", fmt.Errorf("boards must be positive")
+		return fmt.Errorf("boards must be positive")
 	}
 	// generate challenge id
-	id := xid.New()
-	challengeId := fmt.Sprintf("%s:%s", bot, id.String())
-	// create challenge
+	challengeId := bot
+	if userKey != "" {
+		challengeId = fmt.Sprintf("%s:%s", bot, userKey)
+	}
+	// create or update challenge
 	key := fmt.Sprintf("challenge:tictactoe:%s", challengeId)
-	hsetArgs := []string{key,
+	hsetArgs := []string{
+		key,
 		"boards", strconv.Itoa(boards),
 	}
 	if opponent != "" {
 		hsetArgs = append(hsetArgs, "opponent", opponent)
 	}
-	err := d.pool.Do(radix.Cmd(nil, "HSET", hsetArgs...))
+	err := d.pool.Do(radix.Pipeline(
+		radix.Cmd(nil, "HSET", hsetArgs...),
+		radix.Cmd(nil, "EXPIRE", key, strconv.Itoa(ChallengeLifetimeSecs)),
+	))
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return challengeId, nil
+	return nil
 }
 
 func (d Driver) Confirm(bot, challenge string) string {
