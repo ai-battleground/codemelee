@@ -73,20 +73,41 @@ func (d Driver) Challenge(bot string, boards int, opponent string, userKey strin
 
 func (d Driver) ChallengeState(bot string, userKey string) (state ChallengeState, err error) {
 	err = d.pool.Do(radix.Cmd(&state.Active, "EXISTS", fmt.Sprintf("challenge:tictactoe:%s", keySuffix(bot, userKey))))
-	if err != nil || !state.Active {
-		return state, err
+	if err != nil {
+		fmt.Printf("%s error getting challenge %s %v", time.Now().Format(logTimeFormat), keySuffix(bot, userKey), err)
+		return state, ErrInternalDataStore
+	}
+	if !state.Active {
+		// check if there's a game
+		err = d.pool.Do(radix.Cmd(&state.Match, "GET",
+			fmt.Sprintf("game:tictactoe:%s", keySuffix(bot, userKey))))
+		if state.Match == "" {
+			// nope nothing there
+			return state, nil
+		} else {
+			state.Active = true
+			return state, nil
+		}
 	}
 
 	err = d.pool.Do(radix.Cmd(&state.Match, "HGET",
 		fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)),
 		"match",
 	))
-	if err != nil || state.Match == "" {
-		return state, err
+	if err != nil {
+		fmt.Printf("%s error getting opportunity %s %v\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey), err)
+		return state, ErrInternalDataStore
+	}
+	if state.Match == "" {
+		return state, nil
 	}
 
 	err = d.pool.Do(radix.Cmd(&state.Confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", state.Match)))
-	return state, err
+	if err != nil {
+		fmt.Printf("%s error getting observations %s %v\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey), err)
+		return state, ErrInternalDataStore
+	}
+	return state, nil
 }
 
 func (d Driver) Confirm(bot, userKey, match string) error {
@@ -97,11 +118,14 @@ func (d Driver) Confirm(bot, userKey, match string) error {
 		fmt.Printf("%s error getting opportunity %s", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return err
 	}
-	match, token := reply[0], reply[1]
-	if match == "" {
+	if reply[0] == "" {
 		fmt.Printf("%s No opportunity found %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return ErrMatchNotFound
 	}
+	if match != reply[0] {
+		fmt.Printf("%s Match %s no longer valid for %s\n", time.Now().Format(logTimeFormat), match, keySuffix(bot, userKey))
+	}
+	token := reply[1]
 
 	// confirm challenge (ensure token exists: opportunity->token, challenge->match) write
 	if token == "" {
@@ -126,9 +150,15 @@ func (d Driver) Confirm(bot, userKey, match string) error {
 		return ErrChallengeNotFound
 	}
 
-	err = d.pool.Do(radix.Cmd(nil, "HSET",
-		fmt.Sprintf("challenge:tictactoe:%s", keySuffix(bot, userKey)),
-		"match", match))
+	err = d.pool.Do(radix.Pipeline(
+		radix.Cmd(nil, "HSET",
+			fmt.Sprintf("challenge:tictactoe:%s", keySuffix(bot, userKey)),
+			"match", match),
+		radix.Cmd(nil, "SET",
+			fmt.Sprintf("game:tictactoe:%s", keySuffix(bot, userKey)),
+			match,
+			"EX", "3600"), // expire in an hour
+	))
 	if err != nil {
 		fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return ErrInternalDataStore

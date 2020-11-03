@@ -6,6 +6,7 @@ type ChallengeState struct {
 	Active    bool
 	Match     string
 	Confirmed bool
+	Started   bool
 }
 
 type Observation struct {
