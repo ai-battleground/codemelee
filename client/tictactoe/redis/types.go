@@ -2,6 +2,12 @@ package tictactoe
 
 import "time"
 
+type ChallengeState struct {
+	Active    bool
+	Match     string
+	Confirmed bool
+}
+
 type Observation struct {
 	Boards        [][]byte
 	MyTurn        bool

@@ -46,13 +46,8 @@ func (d Driver) Challenge(bot string, boards int, opponent string, userKey strin
 	if boards < 1 {
 		return fmt.Errorf("boards must be positive")
 	}
-	// generate challenge id
-	challengeId := bot
-	if userKey != "" {
-		challengeId = fmt.Sprintf("%s:%s", bot, userKey)
-	}
 	// create or update challenge
-	key := fmt.Sprintf("challenge:tictactoe:%s", challengeId)
+	key := fmt.Sprintf("challenge:tictactoe:%s", keySuffix(bot, userKey))
 	hsetArgs := []string{
 		key,
 		"boards", strconv.Itoa(boards),
@@ -69,6 +64,21 @@ func (d Driver) Challenge(bot string, boards int, opponent string, userKey strin
 	}
 
 	return nil
+}
+
+func (d Driver) ChallengeState(bot string, userKey string) (state ChallengeState, err error) {
+	err = d.pool.Do(radix.Cmd(&state.Active, "EXISTS", fmt.Sprintf("challenge:tictactoe:%s", keySuffix(bot, userKey))))
+	if err != nil || !state.Active {
+		return state, err
+	}
+
+	err = d.pool.Do(radix.Cmd(&state.Match, "HGET", fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey))))
+	if err != nil || state.Match == "" {
+		return state, err
+	}
+
+	err = d.pool.Do(radix.Cmd(&state.Confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", state.Match)))
+	return state, err
 }
 
 func (d Driver) Confirm(bot, challenge string) string {
@@ -201,4 +211,11 @@ func (d Driver) Act(bot, game, actions string) error {
 		}
 	}
 	return nil
+}
+
+func keySuffix(bot, userKey string) string {
+	if userKey != "" {
+		userKey = ":" + userKey
+	}
+	return bot + userKey
 }
