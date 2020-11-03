@@ -72,7 +72,10 @@ func (d Driver) ChallengeState(bot string, userKey string) (state ChallengeState
 		return state, err
 	}
 
-	err = d.pool.Do(radix.Cmd(&state.Match, "HGET", fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey))))
+	err = d.pool.Do(radix.Cmd(&state.Match, "HGET",
+		fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)),
+		"match",
+	))
 	if err != nil || state.Match == "" {
 		return state, err
 	}
