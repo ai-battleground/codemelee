@@ -1,6 +1,7 @@
 package tictactoe
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mediocregopher/radix/v3"
 	"github.com/rs/xid"
@@ -12,6 +13,10 @@ import (
 
 const logTimeFormat = "2006-01-02 15:04:05.000"
 const ChallengeLifetimeSecs = 30
+
+var ErrMatchNotFound = errors.New("match not found")
+var ErrChallengeNotFound = errors.New("challenge not found")
+var ErrInternalDataStore = errors.New("internal data store error")
 
 type Driver struct {
 	pool               *radix.Pool
@@ -84,69 +89,53 @@ func (d Driver) ChallengeState(bot string, userKey string) (state ChallengeState
 	return state, err
 }
 
-func (d Driver) Confirm(bot, challenge string) string {
+func (d Driver) Confirm(bot, userKey, match string) error {
+	// check if match still available (opportunity->match) read
 	var reply []string
-	err := d.pool.Do(radix.Cmd(&reply, "HMGET", fmt.Sprintf("opportunity:tictactoe:%s", challenge), "match", "token"))
+	err := d.pool.Do(radix.Cmd(&reply, "HMGET", fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)), "match", "token"))
 	if err != nil || len(reply) != 2 {
-		fmt.Printf("%s error getting opportunity %s", time.Now().Format(logTimeFormat), challenge)
-		return ""
+		fmt.Printf("%s error getting opportunity %s", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		return err
 	}
-	game, token := reply[0], reply[1]
-	if game == "" {
-		fmt.Printf("%s No opportunity found %s\n", time.Now().Format(logTimeFormat), challenge)
-		return ""
+	match, token := reply[0], reply[1]
+	if match == "" {
+		fmt.Printf("%s No opportunity found %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		return ErrMatchNotFound
 	}
+
+	// confirm challenge (ensure token exists: opportunity->token, challenge->match) write
 	if token == "" {
-		fmt.Printf("%s No existing token found %s\n", time.Now().Format(logTimeFormat), challenge)
+		fmt.Printf("%s No existing token found %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		token = xid.New().String()
-		err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("opportunity:tictactoe:%s", challenge),
+		err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)),
 			"token", token))
 		if err != nil {
-			fmt.Printf("%s Error providing token for %s\n", time.Now().Format(logTimeFormat), challenge)
-			return ""
+			fmt.Printf("%s Error providing token for %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+			return ErrInternalDataStore
 		}
 	}
 	fmt.Printf("%s Using token *****%s\n", time.Now().Format(logTimeFormat), token[15:20])
 	var valid bool
-	err = d.pool.Do(radix.Cmd(&valid, "EXISTS", fmt.Sprintf("challenge:tictactoe:%s", challenge)))
+	err = d.pool.Do(radix.Cmd(&valid, "EXISTS", fmt.Sprintf("challenge:tictactoe:%s", keySuffix(bot, userKey))))
 	if err != nil {
-		fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), challenge)
-		return ""
+		fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		return ErrInternalDataStore
 	}
 	if !valid {
-		fmt.Printf("%s Challenge missing %s\n", time.Now().Format(logTimeFormat), challenge)
-		return ""
+		fmt.Printf("%s Challenge missing %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		return ErrChallengeNotFound
 	}
 
-	var confirmed bool
-	for !confirmed {
-		var currentGame string
-		err = d.pool.Do(radix.Cmd(&currentGame, "HGET", fmt.Sprintf("opportunity:tictactoe:%s", challenge), "match"))
-		if err != nil {
-			fmt.Printf("%s error getting current game %s, %v", time.Now().Format(logTimeFormat), challenge, err)
-			return ""
-		}
-		err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("challenge:tictactoe:%s", challenge),
-			"match", currentGame))
-		if err != nil {
-			fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), challenge)
-			return ""
-		}
-		if currentGame != game {
-			game = currentGame
-			fmt.Printf("%s Confirmed challenge %s: %s\n", time.Now().Format(logTimeFormat), challenge, game)
-		}
-
-		err = d.pool.Do(radix.Cmd(&confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", game)))
-		if err != nil {
-			fmt.Printf("%s No observation available %s\n", time.Now().Format(logTimeFormat), game)
-			return ""
-		}
-		time.Sleep(250 * time.Millisecond)
+	err = d.pool.Do(radix.Cmd(nil, "HSET",
+		fmt.Sprintf("challenge:tictactoe:%s", keySuffix(bot, userKey)),
+		"match", match))
+	if err != nil {
+		fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		return ErrInternalDataStore
 	}
-	d.token[fmt.Sprintf("%s:%s", bot, game)] = token
-	fmt.Printf("%s Confirmation validated %s\n", time.Now().Format(logTimeFormat), game)
-	return game
+	d.token[keySuffix(bot, userKey)] = token
+	fmt.Printf("%s Confirmation validated %s\n", time.Now().Format(logTimeFormat), match)
+	return nil
 }
 
 func (d Driver) Observe(bot, game string) Observation {
