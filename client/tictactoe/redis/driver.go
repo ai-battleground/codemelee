@@ -77,7 +77,19 @@ func (d Driver) ChallengeState(bot string, userKey string) (state ChallengeState
 		fmt.Printf("%s error getting challenge %s %v", time.Now().Format(logTimeFormat), keySuffix(bot, userKey), err)
 		return state, ErrInternalDataStore
 	}
-	if !state.Active {
+	if state.Active {
+		err = d.pool.Do(radix.Cmd(&state.Match, "HGET",
+			fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)),
+			"match",
+		))
+		if err != nil {
+			fmt.Printf("%s error getting opportunity %s %v\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey), err)
+			return state, ErrInternalDataStore
+		}
+		if state.Match == "" {
+			return state, nil
+		}
+	} else {
 		// check if there's a game
 		err = d.pool.Do(radix.Cmd(&state.Match, "GET",
 			fmt.Sprintf("game:tictactoe:%s", keySuffix(bot, userKey))))
@@ -86,23 +98,11 @@ func (d Driver) ChallengeState(bot string, userKey string) (state ChallengeState
 			return state, nil
 		} else {
 			state.Active = true
-			return state, nil
+			state.Confirmed = true
 		}
 	}
 
-	err = d.pool.Do(radix.Cmd(&state.Match, "HGET",
-		fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)),
-		"match",
-	))
-	if err != nil {
-		fmt.Printf("%s error getting opportunity %s %v\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey), err)
-		return state, ErrInternalDataStore
-	}
-	if state.Match == "" {
-		return state, nil
-	}
-
-	err = d.pool.Do(radix.Cmd(&state.Confirmed, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", state.Match)))
+	err = d.pool.Do(radix.Cmd(&state.Started, "EXISTS", fmt.Sprintf("observe:tictactoe:%s", state.Match)))
 	if err != nil {
 		fmt.Printf("%s error getting observations %s %v\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey), err)
 		return state, ErrInternalDataStore
