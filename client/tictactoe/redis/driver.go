@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mediocregopher/radix/v3"
-	"github.com/rs/xid"
 	"net/url"
 	"strconv"
 	"strings"
@@ -19,17 +18,11 @@ var ErrChallengeNotFound = errors.New("challenge not found")
 var ErrInternalDataStore = errors.New("internal data store error")
 
 type Driver struct {
-	pool               *radix.Pool
-	token              map[string]string
-	started            map[string]GameTime
-	lastActionResultId radix.StreamEntryID
+	pool *radix.Pool
 }
 
 func NewDriver(redisUrl string) (Driver, error) {
-	d := Driver{
-		token:   make(map[string]string),
-		started: make(map[string]GameTime),
-	}
+	d := Driver{}
 	u, err := url.Parse(redisUrl)
 	if err != nil {
 		return d, fmt.Errorf("invalid redis URL %s: %w", u, err)
@@ -44,7 +37,7 @@ func NewDriver(redisUrl string) (Driver, error) {
 	return d, err
 }
 
-func (d Driver) Challenge(bot string, boards int, opponent string, userKey string) error {
+func (d Driver) Challenge(bot string, boards int, opponent string, userKey string, token string) error {
 	if bot == "" {
 		return fmt.Errorf("bot name is required")
 	}
@@ -110,45 +103,43 @@ func (d Driver) ChallengeState(bot string, userKey string) (state ChallengeState
 	return state, nil
 }
 
-func (d Driver) Confirm(bot, userKey, match string) error {
+func (d Driver) Confirm(bot, userKey, match, token string) error {
 	// check if match still available (opportunity->match) read
 	var reply []string
 	err := d.pool.Do(radix.Cmd(&reply, "HMGET", fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)), "match", "token"))
 	if err != nil || len(reply) != 2 {
-		fmt.Printf("%s error getting opportunity %s", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		fmt.Printf("%s [Confirm] error getting opportunity %s", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return err
 	}
 	if reply[0] == "" {
-		fmt.Printf("%s No opportunity found %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		fmt.Printf("%s [Confirm] No opportunity found %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return ErrMatchNotFound
 	}
 	if match != reply[0] {
-		fmt.Printf("%s Match %s no longer valid for %s\n", time.Now().Format(logTimeFormat), match, keySuffix(bot, userKey))
+		fmt.Printf("%s [Confirm] Match %s no longer valid for %s\n", time.Now().Format(logTimeFormat), match, keySuffix(bot, userKey))
 	}
-	token := reply[1]
+	if token != reply[1] {
+		fmt.Printf("%s [Confirm] WARNING token has changed during challenge process (%s)\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+	}
 
-	// confirm challenge (ensure token exists: opportunity->token, challenge->match) write
-	if token == "" {
-		fmt.Printf("%s No existing token found %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
-		token = xid.New().String()
-		err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)),
-			"token", token))
-		if err != nil {
-			fmt.Printf("%s Error providing token for %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
-			return ErrInternalDataStore
-		}
-	}
-	fmt.Printf("%s Using token *****%s\n", time.Now().Format(logTimeFormat), token[15:20])
+	// confirm challenge (opportunity->token, challenge->match) write
 	var valid bool
 	err = d.pool.Do(radix.Cmd(&valid, "EXISTS", fmt.Sprintf("challenge:tictactoe:%s", keySuffix(bot, userKey))))
 	if err != nil {
-		fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		fmt.Printf("%s [Confirm] Error confirming challenge %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return ErrInternalDataStore
 	}
 	if !valid {
-		fmt.Printf("%s Challenge missing %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		fmt.Printf("%s [Confirm] Challenge missing %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return ErrChallengeNotFound
 	}
+	err = d.pool.Do(radix.Cmd(nil, "HSET", fmt.Sprintf("opportunity:tictactoe:%s", keySuffix(bot, userKey)),
+		"token", token))
+	if err != nil {
+		fmt.Printf("%s [Confirm] Error setting token for %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		return ErrInternalDataStore
+	}
+	fmt.Printf("%s [Confirm] Using token *****%s\n", time.Now().Format(logTimeFormat), token[15:20])
 
 	err = d.pool.Do(radix.Pipeline(
 		radix.Cmd(nil, "HSET",
@@ -160,11 +151,10 @@ func (d Driver) Confirm(bot, userKey, match string) error {
 			"EX", "3600"), // expire in an hour
 	))
 	if err != nil {
-		fmt.Printf("%s Error confirming challenge %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
+		fmt.Printf("%s [Confirm] Error confirming challenge %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return ErrInternalDataStore
 	}
-	d.token[keySuffix(bot, userKey)] = token
-	fmt.Printf("%s Confirmation validated %s\n", time.Now().Format(logTimeFormat), match)
+	fmt.Printf("%s [Confirm] Confirmation validated %s\n", time.Now().Format(logTimeFormat), match)
 	return nil
 }
 
@@ -222,15 +212,14 @@ func (d Driver) Observe(bot, game string) Observation {
 	return o
 }
 
-func (d Driver) Act(bot, game, actions string) error {
+func (d Driver) Act(bot, game, token, actions string) error {
 	// act:tictactoe:id (stream)
-	if token, ok := d.token[fmt.Sprintf("%s:%s", bot, game)]; ok {
-		err := d.pool.Do(radix.Cmd(nil, "XADD", fmt.Sprintf("act:tictactoe:%s", game), "*",
-			"token", token,
-			"actions", actions))
-		if err != nil {
-			return err
-		}
+	err := d.pool.Do(radix.Cmd(nil, "XADD", fmt.Sprintf("act:tictactoe:%s", game), "*",
+		"token", token,
+		"actions", actions))
+	if err != nil {
+		fmt.Printf("%s [Act] Error (bot: %s, game: %s) %v\n", time.Now().Format(logTimeFormat), bot, game, err)
+		return ErrInternalDataStore
 	}
 	return nil
 }
