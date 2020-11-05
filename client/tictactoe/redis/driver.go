@@ -139,7 +139,6 @@ func (d Driver) Confirm(bot, userKey, match, token string) error {
 		fmt.Printf("%s [Confirm] Error setting token for %s\n", time.Now().Format(logTimeFormat), keySuffix(bot, userKey))
 		return ErrInternalDataStore
 	}
-	fmt.Printf("%s [Confirm] Using token *****%s\n", time.Now().Format(logTimeFormat), token[15:20])
 
 	err = d.pool.Do(radix.Pipeline(
 		radix.Cmd(nil, "HSET",
