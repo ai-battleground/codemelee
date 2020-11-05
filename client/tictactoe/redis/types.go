@@ -19,8 +19,8 @@ type Observation struct {
 	Bot           string
 	Opponent      string
 	Round         int
-	MoveTimeout   time.Duration
-	MatchTimeout  time.Duration
+	MoveExpires   time.Time
+	MatchExpires  time.Time
 }
 
 type GameTime struct {

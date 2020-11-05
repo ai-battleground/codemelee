@@ -209,11 +209,11 @@ func (d Driver) Observe(bot, userKey string) Observation {
 			o.MyTurn = v == bot
 		case k == "turnExpires":
 			if ms, err := strconv.Atoi(v); err == nil {
-				o.MoveTimeout = time.Duration(ms) * time.Millisecond
+				o.MoveExpires = time.Unix(0, int64(ms)*1e6)
 			}
 		case k == "matchExpires":
 			if ms, err := strconv.Atoi(v); err == nil {
-				o.MatchTimeout = time.Duration(ms) * time.Millisecond
+				o.MatchExpires = time.Unix(0, int64(ms)*1e6)
 			}
 		}
 	}
